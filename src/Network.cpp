@@ -124,14 +124,7 @@ void Network::initialize(int N_NP, int N_normal){
     feedbackIb = std::list<feedback>();
     feedbackII = std::list<feedback>();
     
-    lscond=std::vector<LimbSensorCondition>(2);
-    for(int i = 0;i<7;i++){
-        for(int k = 0;k<2;k++){
-            lscond[k].Ia.push_back(0.0);
-            lscond[k].Ib.push_back(0.0);
-            lscond[k].II.push_back(0.0);
-        }
-    }
+    
     transV = myvec(N_Neurons);
     //randomGen = OrnsteinUhlenbeck(N_NP+N_normal,0.0,1.0,5.0);
 }
@@ -449,7 +442,7 @@ void Network::assign_para(myvec &to,myvec from){
     }
 }
 
-Network::Network(std::string filename,std::vector<std::vector<std::string>> mnnames){
+Network::Network(std::string filename,std::vector<std::string> musclenames, std::vector<std::vector<std::string>> mnnames){
     std::ifstream myfile (filename);
     std::string line;
     
@@ -476,6 +469,14 @@ Network::Network(std::string filename,std::vector<std::vector<std::string>> mnna
             return;
         }
         initialize(NNaP,NNorm);
+        lscond=std::vector<LimbSensorCondition>(2);
+        for(int i = 0;i<musclenames.size();i++){
+            for(int k = 0;k<2;k++){
+                lscond[k].Ia.push_back(0.0);
+                lscond[k].Ib.push_back(0.0);
+                lscond[k].II.push_back(0.0);
+            }
+        }
         myvec ofun_double=create_scalarV(N_NaP+N_norm,0.0);
         int no_neuron = -1;
         while ( safeGetline (myfile,line) )
@@ -603,27 +604,12 @@ Network::Network(std::string filename,std::vector<std::vector<std::string>> mnna
                 if(strs[1]=="R_front"){
                     fromleg=3;
                 }
-                if(strs[2]=="IP"){
-                    frommg=0;
+                for(std::size_t m_in=0;m_in<musclenames.size();++m_in){
+                    if(strs[2]==musclenames[m_in]){
+                        frommg=static_cast<int>(m_in);
+                    }
                 }
-                if(strs[2]=="GM"){
-                    frommg=1;
-                }
-                if(strs[2]=="VL"){
-                    frommg=2;
-                }
-                if(strs[2]=="TA"){
-                    frommg=3;
-                }
-                if(strs[2]=="SO"){
-                    frommg=4;
-                }
-                if(strs[2]=="BF"){
-                    frommg=5;
-                }
-                if(strs[2]=="GA"){
-                    frommg=6;
-                }
+                
                 if(strs[0]=="feedbackIa"){
                     setFeedbackIa(to, fromleg, frommg, weight);
                     std::cout << "adding feedbackIa from "<< fromleg << strs[1] << " " << strs[2] << frommg << " to " << to << strs[3] << " weight " << *weight << std::endl;

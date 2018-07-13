@@ -1,13 +1,11 @@
 //
-//  Network.h
-//  iCPG
+//  Network.hpp
 //
 //  Created by Simon Danner on 22/05/15.
-//  Copyright (c) 2015 Simon Danner. All rights reserved.
 //
 
-#ifndef __iCPG__Network__
-#define __iCPG__Network__
+#ifndef Network_hpp
+#define Network_hpp
 
 #include <stdio.h>
 #include <list>
@@ -67,7 +65,7 @@ struct connection{
     double *weight; //offset
     double *slope; //ms^-1
 };
-typedef boost::numeric::ublas::vector<std::list<connection>> connection_matrix;
+typedef boost::numeric::ublas::vector< std::list<connection> > connection_matrix;
 
 
 class OrnsteinUhlenbeck{
@@ -189,7 +187,7 @@ public:
     
     Network();
     Network(int N_NP, int N_normal);
-    Network(std::string /*filename*/,std::vector<std::vector<std::string>> /*mnnames*/);
+    Network(std::string /*filename*/,std::vector<std::string> /*musclenames*/, std::vector<std::vector<std::string>> /*mnnames*/);
     
     void initialize(int /*N_NP*/, int /*N_normal*/);
     

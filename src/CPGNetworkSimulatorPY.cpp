@@ -14,7 +14,7 @@ PYBIND11_MODULE(CPGNetworkSimulator, m) {
         .def_readwrite("cutaneous", &LimbSensorCondition::cutaneous);
 
     py::class_<CPGNetworkSimulator>(m, "CPGNetworkSimulator")
-        .def(py::init<const std::string, const std::vector<std::vector<std::string>>>())
+        .def(py::init<const std::string, const std::vector<std::string>, const std::vector<std::vector<std::string>>>())
         .def("step", &CPGNetworkSimulator::step)
         .def("getAct", &CPGNetworkSimulator::getAct)
         .def("setAlpha", &CPGNetworkSimulator::setAlpha)
