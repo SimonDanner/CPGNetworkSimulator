@@ -106,10 +106,18 @@ struct feedback{
     feedback(int to_,int fromleg_,int frommg_,double* weight_):to(to_),frommg(frommg_),fromleg(fromleg_),weight(weight_){}
 };
 
+struct feedback_body_tilt{
+    int direction;
+    double* cutoff;
+    double* weight;
+    int to;
+    int type;
+};
 
 class Network{
 private:
 public:
+    BodyTilt body_tilt;
     std::vector<LimbSensorCondition> lscond;
     
     std::map<int,std::string> names;
@@ -163,6 +171,7 @@ public:
     std::list<feedback> feedbackIb;
     std::list<feedback> feedbackII;
     std::list<feedback> feedbackCutaneous;
+    std::list<feedback_body_tilt> feedbackBodyTilt;
     
     myvec transV;
     

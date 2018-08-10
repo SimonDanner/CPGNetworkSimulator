@@ -12,6 +12,13 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <array>
 
+struct BodyTilt{
+    //anterior/left positive
+    double anterior_posterior_angle = 0.0;
+    double anterior_posterior_velocity = 0.0;
+    double left_right_angle = 0.0;
+    double left_right_velocity = 0.0;
+};
 
 struct LimbSensorCondition{
     std::vector<double> Ia;

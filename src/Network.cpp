@@ -623,6 +623,52 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
                     setFeedbackCutaneous(to, fromleg, weight);
                     std::cout << "adding feedbackCutaneous from "<< fromleg << strs[1] << " to " << to << strs[3] << " weight " << *weight << std::endl;
                 }
+            }else if (strs[0]=="feedbackBodyTilt") {
+                feedback_body_tilt bt;
+                
+                if(isValid<double>(strs[6])){
+                    bt.weight = new double;
+                    *(bt.weight) = std::stod(strs[6],&sz);
+                }else if(variableMap.find(strs[6])!=variableMap.end()){
+                    auto it = variableMap.find(strs[6]);
+                    bt.weight = it->second;
+                }
+                if(strs.size()>8){
+                    if(isValid<double>(strs[8])){
+                        bt.cutoff = new double;
+                        *(bt.cutoff) = std::stod(strs[8],&sz);
+                    }else if(variableMap.find(strs[8])!=variableMap.end()){
+                        auto it = variableMap.find(strs[8]);
+                        bt.cutoff = it->second;
+                    }
+                }else{
+                    bt.cutoff = new double(0.0);
+                }
+                for (auto it=names.begin(); it!=names.end(); ++it){
+                    if(it->second==strs[4]){
+                        bt.to = it->first;
+                    }
+                }
+                if(strs[1]=="ANTERIOR"){
+                    bt.direction=0;
+                }
+                if(strs[1]=="POSTERIOR"){
+                    bt.direction=1;
+                }
+                if(strs[1]=="LEFT"){
+                    bt.direction=2;
+                }
+                if(strs[1]=="RIGHT"){
+                    bt.direction=3;
+                }
+                if(strs[2]=="ANGLE"){
+                    bt.type=0;
+                }
+                if(strs[2]=="VELOCITY"){
+                    bt.type=1;
+                }
+                feedbackBodyTilt.push_back(bt);
+                std::cout << "adding feedbackBodyTilt " <<  strs[1] << bt.direction << " " << strs[2] << bt.type << " to " << strs[4] << bt.to << " with weight " << *bt.weight << " cutoff " << *bt.cutoff << std::endl;
             }else if (strs[0]=="simDuration") {
                 simDuration=std::stod(strs[1],&sz);
                 std::cout << "setting simDuration to " << simDuration << std::endl;
@@ -852,6 +898,31 @@ void Network::step(const myvec &x, myvec &dxdt, double t){
     for(auto it=feedbackCutaneous.begin();it!=feedbackCutaneous.end();++it){
         if(*it->weight>=0){
             dxdt[it->to]-=lscond[it->fromleg].cutaneous*(*it->weight)*(x[it->to]-ESynE[it->to])/Cmem[it->to];
+        }
+    }
+    for(auto it=feedbackBodyTilt.begin();it!=feedbackBodyTilt.end();++it){
+        double angle;
+        double velocity;
+        if (it->direction==0||it->direction==1){
+            angle = body_tilt.anterior_posterior_angle;
+            velocity = body_tilt.anterior_posterior_velocity;
+        }else{
+            angle = body_tilt.left_right_angle;
+            velocity = body_tilt.left_right_velocity;
+        }
+        double value;
+        if(it->type==0){
+            value = angle;
+        }else{
+            value = velocity;
+        }
+        value-=*it->cutoff;
+        if (it->direction==1||it->direction==3){
+            value *= -1.0;
+        }
+        if(value>0.0 && *it->weight){
+            //std::cout << "adding tiltfb" <<std::endl;
+            dxdt[it->to]-=value*(*it->weight)*(x[it->to]-ESynE[it->to])/Cmem[it->to];
         }
     }
     for (auto it = driveE.begin(); it != driveE.end(); ++it){

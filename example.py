@@ -11,7 +11,7 @@ right = ["MnIP_R_hind", "MnGM_R_hind", "MnVL_R_hind", "MnTA_R_hind", "MnSO_R_hin
 mnnames = list()
 mnnames.append(left)
 mnnames.append(right)
-simulator = nsim.CPGNetworkSimulator("./models/Human2CPG.txt",musclenames,mnnames)
+simulator = nsim.CPGNetworkSimulator("./models/Human2CPG_3.txt",musclenames,mnnames)
 lscondL = nsim.LimbSensorCondition(9)
 lscondR = nsim.LimbSensorCondition(9)
 
@@ -26,7 +26,9 @@ alpha = 0.1
 for i,t in enumerate(time):
     #alpha+=0.0001
     simulator.setAlpha(alpha)
-    simulator.step(dt)
+    for k in range(10):
+        simulator.step(dt/10.0)
+    
     if t==5.0:
         simulator.updateVariable("FtoIP",10.0)
         print("updated variable")
@@ -36,10 +38,12 @@ for i,t in enumerate(time):
         simulator.setLscond([lscondL,lscondR])
         print("updated lscond")
 
+    if t==5.0:
+        simulator.setBodyTilt(0.0,-1.0,0.0,0.0);
 
     act = simulator.getAct()
     acts00[i]=act[0][:]
     
 fig, ax = plt.subplots()
-plt.plot(time,acts00[:,8])
+plt.plot(time,acts00[:,7])
 plt.show()

@@ -1,6 +1,6 @@
 from distutils.core import setup, Extension
 
-MAJOR_VERSION=0
+MAJOR_VERSION=1
 MINOR_VERSION=1
 print(str(MAJOR_VERSION) + '.' + str(MINOR_VERSION))
 module1 = Extension('CPGNetworkSimulator',

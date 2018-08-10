@@ -50,10 +50,16 @@ public:
     CPGNetworkSimulator(const std::string filename,const std::vector<std::string> musclenames,const std::vector<std::vector<std::string>> mnnames_);
     void setAlpha(double alpha){net->alpha = alpha;};
     void step(double dt);
-    std::vector<std::vector<double>>& getAct(){return act;};
+    const std::vector<std::vector<double>>& getAct(){return act;};
     bool updateVariable(const std::string var, double value);
     void setLscond(std::vector<LimbSensorCondition>& ls_){
         net->setLscond(ls_);
+    }
+    void setBodyTilt(double apa, double apv,double lra, double lrv){
+        net->body_tilt.anterior_posterior_angle=apa;
+        net->body_tilt.anterior_posterior_velocity=apv;
+        net->body_tilt.left_right_angle=lra;
+        net->body_tilt.left_right_velocity=lrv;
     }
 };
 
