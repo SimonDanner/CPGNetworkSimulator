@@ -281,6 +281,15 @@ variable fb_ANTE_angle    0.0
 variable fb_POST_angle    0.0
 variable fb_ANTE_velocity 0.0
 variable fb_POST_velocity 0.0
+variable posturalPostTiltIP  0.0
+variable posturalPostTiltTA  0.0
+variable posturalPostTiltRF  0.0
+variable posturalPostTiltVL  0.0
+variable posturalAnteTiltGM  0.0 
+variable posturalAnteTiltGA  0.0 
+variable posturalAnteTiltBF  0.0 
+variable posturalAnteTiltHAM 0.0
+variable posturalAnteTiltSO  0.0 
 
 //hind RG level
 connectionE RGF_NaP_L_hind -> InF_L_hind : 4 + 0 * t
@@ -569,6 +578,31 @@ connectionE V3_R_hind -> PFF_NaP_L_hind : 2. + 0 * t
 //connectionE V3e_L_hind -> MnE_NaP_R_hind : 1. + 0 * t
 //connectionE V3e_R_hind -> MnE_NaP_L_hind : 1. + 0 * t
 
+//postural network connections
+
+connectionE InPostural_Ante_L_hind -> MnGM_L_hind  : posturalAnteTiltGM + 0 * t
+connectionE InPostural_Ante_L_hind -> MnGA_L_hind  : posturalAnteTiltGA + 0 * t
+connectionE InPostural_Ante_L_hind -> MnBF_L_hind  : posturalAnteTiltBF + 0 * t
+connectionE InPostural_Ante_L_hind -> MnHAM_L_hind : posturalAnteTiltHAM + 0 * t
+connectionE InPostural_Ante_L_hind -> MnSO_L_hind  : posturalAnteTiltSO + 0 * t
+
+connectionE InPostural_Ante_R_hind -> MnGM_R_hind  : posturalAnteTiltGM + 0 * t
+connectionE InPostural_Ante_R_hind -> MnGA_R_hind  : posturalAnteTiltGA + 0 * t
+connectionE InPostural_Ante_R_hind -> MnBF_R_hind  : posturalAnteTiltBF + 0 * t
+connectionE InPostural_Ante_R_hind -> MnHAM_R_hind : posturalAnteTiltHAM + 0 * t
+connectionE InPostural_Ante_R_hind -> MnSO_R_hind  : posturalAnteTiltSO + 0 * t
+
+
+connectionE InPostural_Post_L_hind -> MnIP_L_hind : posturalPostTiltIP + 0 * t
+connectionE InPostural_Post_L_hind -> MnTA_L_hind : posturalPostTiltTA + 0 * t
+connectionE InPostural_Post_L_hind -> MnRF_L_hind : posturalPostTiltRF + 0 * t
+connectionE InPostural_Post_L_hind -> MnVL_L_hind : posturalPostTiltVL + 0 * t
+
+connectionE InPostural_Post_R_hind -> MnIP_R_hind : posturalPostTiltIP + 0 * t
+connectionE InPostural_Post_R_hind -> MnTA_R_hind : posturalPostTiltTA + 0 * t
+connectionE InPostural_Post_R_hind -> MnRF_R_hind : posturalPostTiltRF + 0 * t
+connectionE InPostural_Post_R_hind -> MnVL_R_hind : posturalPostTiltVL + 0 * t
+
 
 //feedbacks
 
@@ -718,8 +752,6 @@ feedbackIb R_hind RF -> PFSt_NaP_R_hind : fbIb_RF_PFSt
 feedbackIb L_hind HAM -> PFSt_NaP_L_hind : fbIb_HAM_PFSt
 feedbackIb R_hind HAM -> PFSt_NaP_R_hind : fbIb_HAM_PFSt
 
-feedbackBodyTilt POSTERIOR VELOCITY -> MnHAM_L_hind : 1.0 cutoff -.10
-feedbackBodyTilt POSTERIOR VELOCITY -> PFSt_NaP_L_hind : 1.0 
 
 feedbackBodyTilt ANTERIOR  ANGLE -> InPostural_Ante_L_hind : fb_ANTE_angle   
 feedbackBodyTilt ANTERIOR  ANGLE -> InPostural_Ante_R_hind : fb_ANTE_angle   

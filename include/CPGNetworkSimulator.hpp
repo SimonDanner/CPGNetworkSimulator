@@ -42,6 +42,8 @@ private:
     OdeSystemNetwork sys;
     std::vector< std::vector<double> > act;
     std::vector< std::vector<std::string> > mnnames;
+    std::vector<double*> variableVectorPointers;
+    std::vector<std::string> variableVectorNames;
     double dt;
     myvec state;
     Network* net;
@@ -61,6 +63,8 @@ public:
         net->body_tilt.left_right_angle=lra;
         net->body_tilt.left_right_velocity=lrv;
     }
+    void setupVariableVector(const std::vector<std::string> variablenames);
+    void updateVariableVector(const std::vector<double> values);
 };
 
 #endif /* Solver_hpp */

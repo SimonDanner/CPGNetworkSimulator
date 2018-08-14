@@ -35,3 +35,6 @@
 .vscode/*
 
 build/*
+
+__pycache__
+*.pyc

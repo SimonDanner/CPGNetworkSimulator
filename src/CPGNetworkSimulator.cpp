@@ -46,3 +46,21 @@ void CPGNetworkSimulator::step(double dt_){
 bool CPGNetworkSimulator::updateVariable(const std::string var, double value){
     return net->updateVariable(var,value);
 }
+
+void CPGNetworkSimulator::setupVariableVector(const std::vector<std::string> variablenames){
+    variableVectorNames = variablenames;
+    variableVectorPointers = std::vector<double*>(variableVectorNames.size());
+    for(int i = 0;i < variableVectorNames.size();++i){
+        variableVectorPointers[i]=net->getVariablePointers(variableVectorNames[i]);
+    }
+
+}
+void CPGNetworkSimulator::updateVariableVector(const std::vector<double> values){
+    if(variableVectorPointers.size()!=values.size()){
+        std::cout << "CPGNetworkSimulator::updateVariableVector: values has wrong size" << std::endl;
+        return;
+    }
+    for(int i = 0;i < variableVectorPointers.size();++i){
+        (*variableVectorPointers[i])=values[i];
+    }
+};

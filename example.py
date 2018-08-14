@@ -22,6 +22,8 @@ time = np.arange(0.0,10,dt)
 acts00=np.zeros((len(time),9))
 simulator.updateVariable("fbIa_IP",1.0)
 alpha = 0.1
+uvars=['FtoIP', 'FtoTA', 'FtoBF', 'FtoRF', 'FtoHAM', 'SwtoIP', 'SwtoTA', 'SwtoBF', 'SwtoHAM', 'SwtoRF']
+simulator.setupVariableVector(uvars)
 
 for i,t in enumerate(time):
     #alpha+=0.0001
@@ -29,17 +31,18 @@ for i,t in enumerate(time):
     for k in range(10):
         simulator.step(dt/10.0)
     
-    if t==5.0:
-        simulator.updateVariable("FtoIP",10.0)
-        print("updated variable")
+    #if t==5.0:
+        #simulator.updateVariable("FtoIP",10.0)
+        #print("updated variable")
 
-    if t==3.0:
-        lscondL.Ia=[1.0,0,0,0,0,0,0,0,0]
-        simulator.setLscond([lscondL,lscondR])
-        print("updated lscond")
+    #if t==3.0:
+        #lscondL.Ia=[1.0,0,0,0,0,0,0,0,0]
+        #simulator.setLscond([lscondL,lscondR])
+        #print("updated lscond")
 
     if t==5.0:
-        simulator.setBodyTilt(0.0,-1.0,0.0,0.0);
+        simulator.updateVariableVector([1.0,2.0,1.0,0.5,14.0,11.0,12.0,0.0,9.0,10.0])
+        #simulator.setBodyTilt(0.0,-1.0,0.0,0.0);
 
     act = simulator.getAct()
     acts00[i]=act[0][:]
