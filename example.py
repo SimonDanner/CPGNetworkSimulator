@@ -1,4 +1,4 @@
-import CPGNetworkSimulator as nsim
+import build.CPGNetworkSimulator as nsim
 import sys
 import matplotlib
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ acts00=np.zeros((len(time),9))
 simulator.updateVariable("fbIa_IP",1.0)
 alpha = 0.1
 uvars=['FtoIP', 'FtoTA', 'FtoBF', 'FtoRF', 'FtoHAM', 'SwtoIP', 'SwtoTA', 'SwtoBF', 'SwtoHAM', 'SwtoRF']
-simulator.setupVariableVector(uvars)
+initialvars=simulator.setupVariableVector(uvars)
 
 for i,t in enumerate(time):
     #alpha+=0.0001
@@ -40,10 +40,11 @@ for i,t in enumerate(time):
         #simulator.setLscond([lscondL,lscondR])
         #print("updated lscond")
 
-    if t==5.0:
+    if t==2.0:
         simulator.updateVariableVector([1.0,2.0,1.0,0.5,14.0,11.0,12.0,0.0,9.0,10.0])
         #simulator.setBodyTilt(0.0,-1.0,0.0,0.0);
-
+    if t==7.0:
+        simulator.updateVariableVector(initialvars)
     act = simulator.getAct()
     acts00[i]=act[0][:]
     

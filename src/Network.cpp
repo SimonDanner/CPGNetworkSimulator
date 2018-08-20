@@ -204,20 +204,13 @@ double* Network::getConnE(const int from, const int to){
     return getConn(connE,from,to);
 }
 
-void Network::resetDrive(std::list<drive>& dr,const int to, const double weight, const double offset){
-    for(auto it=dr.begin();it!=dr.end();++it){
-        if(it->to==to){
-            it->weight=weight;
-            it->offset=offset;
-        }
-    }
-}
-
-void Network::setDriveE(const int to, const double weight, const double offset){
+// set excitatory drive to neuron to with weight weight and offset offset
+void Network::setDriveE(const int to,  double *weight,  double *offset){
     driveE.push_back(drive(to,weight,offset));
 }
 
-void Network::setDriveI(const int to, const double weight, const double offset){
+// set inhibitors drive to neuron to with weight weight and offset offset
+void Network::setDriveI(const int to,  double *weight,  double *offset){
     driveI.push_back(drive(to,weight,offset));
 }
 
@@ -234,38 +227,8 @@ void Network::setFeedbackCutaneous(const int to, const int fromleg,  double* wei
     feedbackCutaneous.push_back(feedback(to,fromleg,-1,weight));
 }
 
-void Network::changeDriveDirection(){
-    for (auto it= driveE.begin();it!=driveE.end();++it){
-        it->offset+=it->weight*(simDuration);
-        it->weight*=-1;
-    }
-    for (auto it= driveI.begin();it!=driveI.end();++it){
-        it->offset+=it->weight*(simDuration);
-        it->weight*=-1;
-    }
-    simDirection*=-1;
-}
 
-void Network::scaleDuration(double sf){
-    for (auto it= driveE.begin();it!=driveE.end();++it){
-        it->weight/=sf;
-    }
-    for (auto it= driveI.begin();it!=driveI.end();++it){
-        it->weight/=sf;
-    }
-    for (int to = 0; to<N_Neurons;++to){
-        for(auto it = connE(to).begin();it!=connE(to).end();++it){
-            //it->slope/=sf;
-        }
-        for(auto it = connI(to).begin();it!=connI(to).end();++it){
-            //it->slope/=sf;
-        }
-    }
-    
-    simDuration*=sf;
-    settingPeriod*=sf;
-    scalingFactor=sf;
-}
+
 
 std::string Network::getName(const int neuronID) const{
     return (*names.find(neuronID)).second;
@@ -316,14 +279,14 @@ std::ostream& operator<<(std::ostream& stream, const Network& net){
     }
     stream << std::endl ;
     for (auto it= net.driveE.begin();it!=net.driveE.end();++it){
-        if (it->weight!=0||it->offset!=0.0){
-            stream << "driveE " <<  it->weight << " * t + " << it->offset << " -> "  << net.getName(it->to) << std::endl;
+        if (*it->weight!=0||*it->offset!=0.0){
+            stream << "driveE " <<  *it->weight << " * t + " << *it->offset << " -> "  << net.getName(it->to) << std::endl;
         }
     }
     
     for (auto it= net.driveI.begin();it!=net.driveI.end();++it){
-        if (it->weight!=0||it->offset!=0.0){
-            stream << "driveI " << it->weight << " * t + " << it->offset << " -o -"  << net.getName(it->to) << std::endl;
+        if (*it->weight!=0||*it->offset!=0.0){
+            stream << "driveI " << *it->weight << " * t + " << *it->offset << " -o -"  << net.getName(it->to) << std::endl;
         }
     }
     
@@ -560,20 +523,34 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
                     }
                 }
             }else if(strs[0]=="driveE"||strs[0]=="driveI"){
-                double weight = std::stod(strs[1],&sz);
-                double offset = std::stod(strs[5],&sz);
+                double *weight = nullptr;
+                double *offset = nullptr;
                 int to=-1;
                 for (auto it=names.begin(); it!=names.end(); ++it){
                     if(it->second==strs[7]){
                         to = it->first;
                     }
                 }
+                if(isValid<double>(strs[1])){
+                    weight = new double;
+                    *weight = std::stod(strs[1],&sz);
+                }else if(variableMap.find(strs[1])!=variableMap.end()){
+                    auto it = variableMap.find(strs[1]);
+                    weight = it->second;
+                }
+                if(isValid<double>(strs[5])){
+                    offset = new double;
+                    *offset = std::stod(strs[5],&sz);
+                }else if(variableMap.find(strs[5])!=variableMap.end()){
+                    auto it = variableMap.find(strs[5]);
+                    offset = it->second;
+                }
                 if(strs[0]=="driveE"){
                     setDriveE(to, weight, offset);
-                    std::cout << "adding excitatory drive to " << to << strs[7] << " weight " << weight << " offset " << offset << std::endl;
+                    std::cout << "adding excitatory drive to " << to << strs[7] << " weight " << *weight << " offset " << *offset << std::endl;
                 }else if (strs[0]=="driveI"){
                     setDriveI(to, weight, offset);
-                    std::cout << "adding inhibitory drive to " << to << strs[7] << " weight " << weight << " offset " << offset << std::endl;
+                    std::cout << "adding inhibitory drive to " << to << strs[7] << " weight " << *weight << " offset " << *offset << std::endl;
                 }
             }else if (strs[0]=="feedbackIa"||strs[0]=="feedbackIb"||strs[0]=="feedbackII"||strs[0]=="feedbackCutaneous"){
                 double* weight;
@@ -811,7 +788,6 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
         }
         myfile.close();
         randomGen = OrnsteinUhlenbeck(NNaP+NNorm,0.0,1.0,tauNoise[0]);
-        scaleDuration(sf);
         for(int in = 0; in<outputFunction.size();in++){
             outputFunction[in]=std::lround(ofun_double[in]);
         }
@@ -926,11 +902,11 @@ void Network::step(const myvec &x, myvec &dxdt, double t){
         }
     }
     for (auto it = driveE.begin(); it != driveE.end(); ++it){
-        dxdt[it->to] -= ((alpha * it->weight * sf * 1e5) + it->offset) * (x[it->to] - ESynE[it->to]) / Cmem[it->to];
+        dxdt[it->to] -= ((alpha * *it->weight * 1e5) + *it->offset) * (x[it->to] - ESynE[it->to]) / Cmem[it->to];
     }
 
     for (auto it = driveI.begin(); it != driveI.end(); ++it){
-        dxdt[it->to] -= ((alpha * it->weight * sf * 1e5) + it->offset) * (x[it->to] - ESynI[it->to]) / Cmem[it->to];
+        dxdt[it->to] -= ((alpha * *it->weight * 1e5) + *it->offset) * (x[it->to] - ESynI[it->to]) / Cmem[it->to];
     }
 }
 OrnsteinUhlenbeck::OrnsteinUhlenbeck(int n, double m, double s, double t):N(n),mu(m),sigma(s),tau(t){

@@ -87,11 +87,12 @@ public:
     myvec get(double t);
 };
 
+// sturcture describing a drive-connection
 struct drive{
-    int to;
-    double weight;
-    double offset;
-    drive(int toc, double weightc, double offsetc){
+    int to;         // index of neuron
+    double *weight; // pointer to connection weight
+    double *offset; // pointer to offset
+    drive(int toc, double *weightc, double *offsetc){
         to=toc;
         weight=weightc;
         offset=offsetc;
@@ -219,12 +220,9 @@ public:
     double* getConnI(const int, const int);
     
     
-    void setDriveE(const int to, const double weight, const double offset);
-    void setDriveI(const int to, const double weight, const double offset);
-    void resetDrive(std::list<drive>& dr,const int to, const double weight, const double offset);
-    void resetDriveE(const int to, const double weight, const double offset){resetDrive(driveE,to,weight,offset);};
-    void resetDriveI(const int to, const double weight, const double offset){resetDrive(driveI,to,weight,offset);};
-    
+    void setDriveE(const int to,  double *weight,  double *offset);
+    void setDriveI(const int to,  double *weight,  double *offset);
+
     void setFeedbackIa(const int to, const int fromleg, const int frommg,  double* weight);
     void setFeedbackIb(const int to, const int fromleg, const int frommg,  double* weight);
     void setFeedbackII(const int to, const int fromleg, const int frommg,  double* weight);
@@ -232,9 +230,7 @@ public:
     
     std::string getName(const int /*neuronID*/) const;
     int getIndex(const std::string /*name*/) const;
-    
-    void changeDriveDirection();
-    void scaleDuration(double /*scaling factor*/);
+
     
     friend std::ostream& operator<<(std::ostream&,const Network&);
     

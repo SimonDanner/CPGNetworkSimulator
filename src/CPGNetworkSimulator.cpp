@@ -47,13 +47,15 @@ bool CPGNetworkSimulator::updateVariable(const std::string var, double value){
     return net->updateVariable(var,value);
 }
 
-void CPGNetworkSimulator::setupVariableVector(const std::vector<std::string> variablenames){
+std::vector<double> CPGNetworkSimulator::setupVariableVector(const std::vector<std::string> variablenames){
     variableVectorNames = variablenames;
     variableVectorPointers = std::vector<double*>(variableVectorNames.size());
+    std::vector<double> values(variableVectorNames.size());
     for(int i = 0;i < variableVectorNames.size();++i){
         variableVectorPointers[i]=net->getVariablePointers(variableVectorNames[i]);
+        values[i] = *variableVectorPointers[i];
     }
-
+    return values;
 }
 void CPGNetworkSimulator::updateVariableVector(const std::vector<double> values){
     if(variableVectorPointers.size()!=values.size()){

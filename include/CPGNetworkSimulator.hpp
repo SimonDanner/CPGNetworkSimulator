@@ -63,7 +63,7 @@ public:
         net->body_tilt.left_right_angle=lra;
         net->body_tilt.left_right_velocity=lrv;
     }
-    void setupVariableVector(const std::vector<std::string> variablenames);
+    std::vector<double> setupVariableVector(const std::vector<std::string> variablenames);
     void updateVariableVector(const std::vector<double> values);
 };
 
