@@ -12,7 +12,7 @@ simulator = nsim.CPGNetworkSimulator("./models/MLR_60.txt",["a","b"],(["RGF_NaP_
 variable_names = ('d0_CnF_GAT','d0_CnF_Glu')
 ranges = ([1.15,1.85],[2.34,2.64])
 ofilename='cnf_glu.h5'
-steps = (10,10)
+steps = (100,100)
 
 
 frequency = np.zeros(steps+(2,))*np.nan
@@ -26,8 +26,9 @@ alpha=0.0
 simulator.setAlpha(alpha)
 time_vec = np.arange(0.0,duration,dt)
 
-v0=ranges[0][0]+(np.arange(0,steps[0],1)-1.0)/(steps[0]-1.0)*(ranges[0][1]-ranges[0][0])
-v1=ranges[1][0]+(np.arange(0,steps[1],1)-1.0)/(steps[1]-1.0)*(ranges[1][1]-ranges[1][0])
+v0=ranges[0][0]+(np.arange(0,steps[0],1))/(steps[0]-1.0)*(ranges[0][1]-ranges[0][0])
+v1=ranges[1][0]+(np.arange(0,steps[1],1))/(steps[1]-1.0)*(ranges[1][1]-ranges[1][0])
+#import IPython; IPython.embed()
 
 def run_sim():
     out = np.zeros((len(time_vec),4))
