@@ -5,6 +5,7 @@ import numpy as np
 import numpy.matlib as npml
 from scipy.stats import circstd, circmean
 import h5py
+from scoop import futures
 
  
 simulator = nsim.CPGNetworkSimulator("./models/MLR_60.txt",["a","b"],(["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"],))
@@ -13,11 +14,6 @@ variable_names = ('d0_CnF_GAT','d0_CnF_Glu')
 ranges = ([1.15,1.85],[2.34,2.64])
 ofilename='cnf_glu.h5'
 steps = (100,100)
-
-
-frequency = np.zeros(steps+(2,))*np.nan
-phases = np.zeros(steps+(3,2))*np.nan
-
 
 dt=0.001
 duration = 10.0
@@ -70,20 +66,27 @@ def do_iteration(i,j):
         fq, phases_, stdp = calc_phase(time_vec,out)
     return (fq,phases_)
 
+simulator.updateVariable(variable_names[0],v0[0])
+simulator.updateVariable(variable_names[1],v1[0])
 run_sim()
 IC=simulator.getState()
 
 
-for i in range(0,steps[0]):
+def do_one_bifurcation(i):
+    frequency = np.zeros((steps[1],2))*np.nan
+    phases = np.zeros((steps[1],3,2))*np.nan
     IChist=list()
     j_start_back=0
     go_up_on_nan=True
     simulator.setState(IC)
+    simulator.updateVariable(variable_names[0],v0[i])
+    simulator.updateVariable(variable_names[0],v1[0])
+    run_sim()
     for j in range(0,steps[1]):
         IChist.append(simulator.getState())
         fq, phases_ = do_iteration(i,j)
-        frequency[i,j,0]=fq
-        phases[i,j,:,0]=phases_
+        frequency[j,0]=fq
+        phases[j,:,0]=phases_
         j_start_back=j
         if np.isnan(fq) and not go_up_on_nan:
             j_start_back=j-2
@@ -94,40 +97,49 @@ for i in range(0,steps[0]):
     simulator.setState(IChist[-2])
     for j in np.arange(j_start_back,-1,-1):
         fq, phases_ = do_iteration(i,j)
-        frequency[i,j,1]=fq
-        phases[i,j,:,1]=phases_
+        frequency[j,1]=fq
+        phases[j,:,1]=phases_
         if np.isnan(fq):
             break
+
+    return (frequency,phases)
     
+if __name__ == "__main__":
+    frequency = np.zeros(steps+(2,))*np.nan
+    phases = np.zeros(steps+(3,2))*np.nan
+    paras=futures.map(do_one_bifurcation,[x for x in range(steps[0])])
+    for i,(fq,ph) in enumerate(paras):
+        frequency[i,:,:]=fq
+        phases[i,:,:,:]=ph
+    #import IPython; IPython.embed()
+        
+    h5f = h5py.File(ofilename, 'w')
+    h5f.create_dataset('frequency', data=frequency)
+    h5f.create_dataset('phases', data=phases)
+    h5f.create_dataset('v0', data=v0)
+    h5f.create_dataset('v1', data=v1)
+    h5f.close()
 
+    fig, ax = plt.subplots()
+    plt.subplot(2,1,1)
+    plt.pcolor(v0,v1,frequency[:,:,0])
+    plt.subplot(2,1,2)
+    plt.pcolor(frequency[:,:,1])
 
-h5f = h5py.File(ofilename, 'w')
-h5f.create_dataset('frequency', data=frequency)
-h5f.create_dataset('phases', data=phases)
-h5f.create_dataset('v0', data=v0)
-h5f.create_dataset('v1', data=v1)
-h5f.close()
-
-fig, ax = plt.subplots()
-plt.subplot(2,1,1)
-plt.pcolor(v0,v1,frequency[:,:,0])
-plt.subplot(2,1,2)
-plt.pcolor(frequency[:,:,1])
-
-fig, ax = plt.subplots()
-plt.subplot(3,2,1)
-plt.pcolor(v0,v1,phases[:,:,0,0])
-plt.subplot(3,2,3)
-plt.pcolor(v0,v1,phases[:,:,1,0])
-plt.subplot(3,2,5)
-plt.pcolor(v0,v1,phases[:,:,2,0])
-plt.subplot(3,2,2)
-plt.pcolor(v0,v1,phases[:,:,0,1])
-plt.subplot(3,2,4)
-plt.pcolor(v0,v1,phases[:,:,1,1])
-plt.subplot(3,2,6)
-plt.pcolor(v0,v1,phases[:,:,2,1])
-plt.show()   
+    fig, ax = plt.subplots()
+    plt.subplot(3,2,1)
+    plt.pcolor(v0,v1,phases[:,:,0,0])
+    plt.subplot(3,2,3)
+    plt.pcolor(v0,v1,phases[:,:,1,0])
+    plt.subplot(3,2,5)
+    plt.pcolor(v0,v1,phases[:,:,2,0])
+    plt.subplot(3,2,2)
+    plt.pcolor(v0,v1,phases[:,:,0,1])
+    plt.subplot(3,2,4)
+    plt.pcolor(v0,v1,phases[:,:,1,1])
+    plt.subplot(3,2,6)
+    plt.pcolor(v0,v1,phases[:,:,2,1])
+    plt.show()   
 
 
 #plt.plot(time_vec,out[:,:])
