@@ -8,12 +8,12 @@ import h5py
 from scoop import futures
 
  
-simulator = nsim.CPGNetworkSimulator("./models/MLR_60.txt",["a","b"],(["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"],))
+simulator = nsim.CPGNetworkSimulator("./models/MLR_45.txt",["a","b"],(["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"],))
 
 variable_names = ('d0_CnF_GAT','d0_CnF_Glu')
-ranges = ([1.15,1.85],[2.34,2.64])
+ranges = ([1.2,2.],[2.75,3.1])
 ofilename='cnf_glu.h5'
-steps = (100,100)
+steps = (50,50)
 
 dt=0.001
 duration = 10.0
@@ -61,9 +61,11 @@ def do_iteration(i,j):
     fq = 0
     phases_ = [] 
     stdp = 1.0
-    while stdp>0.05:
+    its=0
+    while stdp>0.05 and its <20:
         out = run_sim()
         fq, phases_, stdp = calc_phase(time_vec,out)
+        its+=1
     return (fq,phases_)
 
 simulator.updateVariable(variable_names[0],v0[0])
@@ -80,14 +82,15 @@ def do_one_bifurcation(i):
     go_up_on_nan=True
     simulator.setState(IC)
     simulator.updateVariable(variable_names[0],v0[i])
-    simulator.updateVariable(variable_names[0],v1[0])
-    run_sim()
+    simulator.updateVariable(variable_names[1],v1[0])
+    for r in range(10):
+        run_sim()
     for j in range(0,steps[1]):
         IChist.append(simulator.getState())
         fq, phases_ = do_iteration(i,j)
         frequency[j,0]=fq
         phases[j,:,0]=phases_
-        j_start_back=j
+        j_start_back=j-1
         if np.isnan(fq) and not go_up_on_nan:
             j_start_back=j-2
             break
@@ -102,6 +105,7 @@ def do_one_bifurcation(i):
         if np.isnan(fq):
             break
 
+    #print(str(i) + ' ' + str(frequency))
     return (frequency,phases)
     
 if __name__ == "__main__":
@@ -111,7 +115,7 @@ if __name__ == "__main__":
     for i,(fq,ph) in enumerate(paras):
         frequency[i,:,:]=fq
         phases[i,:,:,:]=ph
-    #import IPython; IPython.embed()
+    
         
     h5f = h5py.File(ofilename, 'w')
     h5f.create_dataset('frequency', data=frequency)
@@ -122,23 +126,23 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots()
     plt.subplot(2,1,1)
-    plt.pcolor(v0,v1,frequency[:,:,0])
+    plt.pcolor(v1,v0,frequency[:,:,0])
     plt.subplot(2,1,2)
-    plt.pcolor(frequency[:,:,1])
+    plt.pcolor(v1,v0,frequency[:,:,1])
 
     fig, ax = plt.subplots()
     plt.subplot(3,2,1)
-    plt.pcolor(v0,v1,phases[:,:,0,0])
+    plt.pcolor(v1,v0,phases[:,:,0,0])
     plt.subplot(3,2,3)
-    plt.pcolor(v0,v1,phases[:,:,1,0])
+    plt.pcolor(v1,v0,phases[:,:,1,0])
     plt.subplot(3,2,5)
-    plt.pcolor(v0,v1,phases[:,:,2,0])
+    plt.pcolor(v1,v0,phases[:,:,2,0])
     plt.subplot(3,2,2)
-    plt.pcolor(v0,v1,phases[:,:,0,1])
+    plt.pcolor(v1,v0,phases[:,:,0,1])
     plt.subplot(3,2,4)
-    plt.pcolor(v0,v1,phases[:,:,1,1])
+    plt.pcolor(v1,v0,phases[:,:,1,1])
     plt.subplot(3,2,6)
-    plt.pcolor(v0,v1,phases[:,:,2,1])
+    plt.pcolor(v1,v0,phases[:,:,2,1])
     plt.show()   
 
 
