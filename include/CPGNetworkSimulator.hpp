@@ -23,7 +23,6 @@ struct OdeSystemNetwork
 };
 
 
-
 typedef runge_kutta_cash_karp54< myvec > stepper_type;
 
 struct UpdateList{
@@ -37,6 +36,7 @@ struct UpdateList{
 class CPGNetworkSimulator{
 private:
     stepper_type stepper;
+    controlled_runge_kutta< stepper_type> controlled_stepper = make_controlled( 1.0e-6 , 1.0e-6 , stepper_type() );;
     int N_last_update=0;
     double t0=0.0;
     OdeSystemNetwork sys;
@@ -52,6 +52,7 @@ public:
     CPGNetworkSimulator(const std::string filename,const std::vector<std::string> musclenames,const std::vector<std::vector<std::string>> mnnames_);
     void setAlpha(double alpha){net->alpha = alpha;};
     void step(double dt);
+    void controlled_step(double dt);
     const std::vector<std::vector<double>>& getAct(){return act;};
     bool updateVariable(const std::string var, double value);
     void setLscond(std::vector<LimbSensorCondition>& ls_){

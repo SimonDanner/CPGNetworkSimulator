@@ -10,12 +10,12 @@ from scoop import futures
  
 simulator = nsim.CPGNetworkSimulator("./models/MLR_45.txt",["a","b"],(["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"],))
 
-variable_names = ('d0_CnF_GAT','d0_CnF_Glu')
+variable_names = ('d0_PPN_GAT','d0_CnF_Glu')
 ranges = ([1.2,2.],[2.75,3.1])
 ofilename='cnf_glu.h5'
-steps = (50,50)
+steps = (20,20)
 
-dt=0.001
+dt=0.005
 duration = 10.0
 
 alpha=0.0
@@ -29,7 +29,7 @@ v1=ranges[1][0]+(np.arange(0,steps[1],1))/(steps[1]-1.0)*(ranges[1][1]-ranges[1]
 def run_sim():
     out = np.zeros((len(time_vec),4))
     for ind_t,t in enumerate(time_vec):
-        simulator.step(dt)
+        simulator.controlled_step(dt)
         act = simulator.getAct()
         out[ind_t,:]=act[0]
     return out

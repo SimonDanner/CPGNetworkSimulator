@@ -20,7 +20,7 @@ CPGNetworkSimulator::CPGNetworkSimulator(const std::string filename,const std::v
 
 void CPGNetworkSimulator::initialize(){
     state=net->genInitialCond();
-    integrate_const( stepper, sys, state , 0.0 , 10., 0.002);
+    integrate_const( controlled_stepper, sys, state , 0.0 , 10., 0.002);
     for(int i = 0;i<net->in_Act.size();++i){
         std::vector<double> v_;
         for(int j = 0;j<net->in_Act[0].size();++j){
@@ -34,6 +34,18 @@ void CPGNetworkSimulator::initialize(){
 void CPGNetworkSimulator::step(double dt_){
     dt=dt_;
     stepper.do_step(sys,state,t0,dt);
+    for(int i = 0;i<net->in_Act.size();++i){
+        for(int j = 0;j<net->in_Act[0].size();++j){
+            act[i][j] = net->transV[net->in_Act[i][j]];
+        }
+    }
+    
+    t0+=dt;
+}
+void CPGNetworkSimulator::controlled_step(double dt_){
+    dt=dt_;
+    integrate_const( controlled_stepper , sys , state , t0 , t0+dt , dt );
+    //controlled_stepper.try_step(sys,state,t0,dt);
     for(int i = 0;i<net->in_Act.size();++i){
         for(int j = 0;j<net->in_Act[0].size();++j){
             act[i][j] = net->transV[net->in_Act[i][j]];

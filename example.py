@@ -18,7 +18,7 @@ lscondR = nsim.LimbSensorCondition(9)
 simulator.setLscond([lscondL,lscondR])
 
 dt=0.001
-time = np.arange(0.0,10,dt)
+time = np.arange(0.0,100,dt)
 acts00=np.zeros((len(time),9))
 simulator.updateVariable("fbIa_IP",1.0)
 alpha = 0.1
@@ -28,8 +28,8 @@ initialvars=simulator.setupVariableVector(uvars)
 for i,t in enumerate(time):
     #alpha+=0.0001
     simulator.setAlpha(alpha)
-    for k in range(10):
-        simulator.step(dt/10.0)
+    
+    simulator.step(dt)
     
     #if t==5.0:
         #simulator.updateVariable("FtoIP",10.0)
@@ -48,6 +48,6 @@ for i,t in enumerate(time):
     act = simulator.getAct()
     acts00[i]=act[0][:]
     
-fig, ax = plt.subplots()
-plt.plot(time,acts00[:,7])
-plt.show()
+#fig, ax = plt.subplots()
+#plt.plot(time,acts00[:,7])
+#plt.show()
