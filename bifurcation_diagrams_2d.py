@@ -11,11 +11,11 @@ from scoop import futures
 simulator = nsim.CPGNetworkSimulator("./models/MLR_45.txt",["a","b"],(["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"],))
 
 variable_names = ('d0_PPN_GAT','d0_CnF_Glu')
-ranges = ([1.2,2.],[2.75,3.1])
+ranges = ([1.0,2.5],[2.6,3.1])
 ofilename='cnf_glu.h5'
 steps = (20,20)
 
-dt=0.005
+dt=0.001
 duration = 10.0
 
 alpha=0.0
@@ -29,7 +29,7 @@ v1=ranges[1][0]+(np.arange(0,steps[1],1))/(steps[1]-1.0)*(ranges[1][1]-ranges[1]
 def run_sim():
     out = np.zeros((len(time_vec),4))
     for ind_t,t in enumerate(time_vec):
-        simulator.controlled_step(dt)
+        simulator.step(dt)
         act = simulator.getAct()
         out[ind_t,:]=act[0]
     return out
@@ -91,11 +91,11 @@ def do_one_bifurcation(i):
         frequency[j,0]=fq
         phases[j,:,0]=phases_
         j_start_back=j-1
-        if np.isnan(fq) and not go_up_on_nan:
-            j_start_back=j-2
-            break
-        if not np.isnan(fq):
-            go_up_on_nan=False
+        #if np.isnan(fq) and not go_up_on_nan:
+        #    j_start_back=j-2
+        #    break
+        #if not np.isnan(fq):
+        #    go_up_on_nan=False
     
     simulator.setState(IChist[-2])
     for j in np.arange(j_start_back,-1,-1):
