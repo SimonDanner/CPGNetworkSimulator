@@ -7,8 +7,8 @@ from scipy.stats import circstd, circmean
 import h5py
 from scoop import futures
 
- 
-simulator = nsim.CPGNetworkSimulator("./models/MLR_45.txt",["a","b"],(["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"],))
+neurons = ["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"]
+simulator = nsim.CPGNetworkSimulator("./models/MLR_45.txt",["a","b"],(neurons,))
 
 sim='cnf_glu_ppn_i'
 run=True
@@ -30,6 +30,7 @@ steps = 2000
 
 dt=0.001
 duration = 10.0
+phase_diffs = [(0,1),(2,3),(0,2),(0,3),(1,3),(1,2)]
 
 simulator.setAlpha(0.0)
 time_vec = np.arange(0.0,duration,dt)
@@ -42,7 +43,7 @@ simulator.updateVariable(variable_name,v[0])
 #import IPython; IPython.embed()
 
 def run_sim():
-    out = np.zeros((len(time_vec),4))
+    out = np.zeros((len(time_vec),len(neurons)))
     for ind_t,t in enumerate(time_vec):
         simulator.step(dt)
         act = simulator.getAct()
@@ -54,15 +55,15 @@ IC=simulator.getState()
 
 def calc_phase(time_vec,out):
     os_=((np.diff((out>0.1).astype(np.int),axis=0)==1).T)
-    onsets=npml.repmat(time_vec[:-1],4,1)[os_]
-    leg=(npml.repmat(np.arange(4.0),len(time_vec)-1,1).T)[os_]
+    onsets=npml.repmat(time_vec[:-1],len(neurons),1)[os_]
+    leg=(npml.repmat(np.arange(len(neurons)),len(time_vec)-1,1).T)[os_]
     times=np.stack((onsets,leg),1)
     times=times[times[:,0].argsort()]
 
     pdur=np.diff(times[(times[:,1]==0),0])
-    phases=np.zeros((4))
-    std_phases=np.zeros((4))
-    for i,(x,y) in enumerate([(0,1),(2,3),(0,2),(0,3)]):
+    phases=np.zeros((len(phase_diffs)))
+    std_phases=np.zeros((len(phase_diffs)))
+    for i,(x,y) in enumerate(phase_diffs):
         times_=times[(times[:,1]==x) | (times[:,1]==y)]
         indices = np.where((times_[:-2,1]==x) & (times_[1:-1,1]==y) & (times_[2:,1]==x))
         pdur_=times_[[ind+2 for ind in indices],0]-times_[indices,0]
@@ -88,7 +89,7 @@ def do_iteration(j):
 
 def do_one_bifurcation():
     frequency = np.zeros((steps,2))*np.nan
-    phases = np.zeros((steps,4,2))*np.nan
+    phases = np.zeros((steps,len(phase_diffs),2))*np.nan
     IChist=list()
     j_start_back=0
     go_up_on_nan=True
@@ -116,8 +117,6 @@ def do_one_bifurcation():
         phases[j,:,1]=phases_
         if np.isnan(fq):
             break
-
-    #print(str(i) + ' ' + str(frequency))
     return (frequency,phases)
     
 if __name__ == "__main__":
@@ -157,14 +156,18 @@ if __name__ == "__main__":
     
     ax4.plot(v,ph[:,2,0],'b.',markersize=1.5)
     ax4.plot(v,ph[:,2,1],'r.',markersize=1.5)
+    ax4.plot(v,ph[:,4,0],'b.',markersize=1.5)
+    ax4.plot(v,ph[:,4,1],'r.',markersize=1.5)
     ax4.set_ylim([-0.05, 1.05])
+
     ax5.plot(v,ph[:,3,0],'b.',markersize=1.5)
     ax5.plot(v,ph[:,3,1],'r.',markersize=1.5)
+    ax5.plot(v,ph[:,5,0],'b.',markersize=1.5)
+    ax5.plot(v,ph[:,5,1],'r.',markersize=1.5)
     ax5.set_ylim([-0.05, 1.05])
     
     
     plt.show()   
-    import IPython; IPython.embed()
 
 
 #plt.plot(time_vec,out[:,:])
