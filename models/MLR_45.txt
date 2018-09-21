@@ -2,7 +2,7 @@ N_NaP 8
 N_Normal 80
 simDuration 92000
 scalingFactor 15
-stepwise 1 10000 0 1.05
+stepwise 1 50000 0 1.05
 
 neuron 0: RGF_NaP_L_hind
 neuron 1: RGF_NaP_R_hind
@@ -101,12 +101,12 @@ variable CnF_Glu_to_LPGi_Glu1    9.5
 variable CnF_Glu_to_cLPGi_Glu1   4.5
 variable CnF_Glu_to_LPGi_Glu2    10.2
 variable CnF_Glu_to_cLPGi_Glu2   0.8
-variable CnF_GAT_to_CnF_Glu      10
+variable CnF_GAT_to_CnF_Glu      5
 
 //from CnF to PPN 
 variable CnF_Glu_to_PPN_Glu      5.6
 variable CnF_Glu_to_cPPN_Glu     1.5
-variable CnF_GAT_to_PPN_Glu      10
+variable CnF_GAT_to_PPN_Glu      5
 
 //from PPN
 variable PPN_Glu_to_LGPi_Glu1    10
@@ -118,10 +118,10 @@ variable LPGi_Glu1_to_tIN_F      10
 variable LPGi_Glu1_to_tCIN       10
 variable LPGi_Glu2_to_tINi_V0    10
 variable LPGi_Glu2_to_ctINi_V0   10
-variable LPGi_GAT_to_LPGi_Glu1   3
-variable LPGi_GAT_to_LPGi_Glu2   3
-variable LPGi_GAT_to_ctIN_F      3
-variable LPGi_GAT_to_ctCIN       3
+variable LPGi_GAT_to_LPGi_Glu1   5
+variable LPGi_GAT_to_LPGi_Glu2   5
+variable LPGi_GAT_to_ctIN_F      5
+variable LPGi_GAT_to_ctCIN       5
 
 //SC projections
 variable tIN_F_to_F              10
@@ -183,50 +183,39 @@ driveE 0 * t + d0_VN -> VN_L
 driveE 0 * t + d0_VN -> VN_R
 
 // if left CnF Glu stimulated uncomment the next 3 lines
-variable d0_CnF_Glu   3.95
-variable kdr_CnF_Glu  0 1.35e-05
-driveE kdr_CnF_Glu * t + d0_CnF_Glu -> CnF_Glu_L
+variable d0_CnF_Glu_L   0
+driveE 0 * t + d0_CnF_Glu_L -> CnF_Glu_L
 
 // if left PPN Glu stimulated uncomment the next 3 lines
-//variable d0_PPN_Glu    4.
-//variable kdr_PPN_Glu   1.5e-05
-//driveE kdr_PPN_Glu * t + d0_PPN_Glu -> PPN_Glu_L
+variable d0_PPN_Glu  0  4.
+variable kdr_PPN_Glu   1.5e-05
+driveE 0 * t + d0_PPN_Glu -> PPN_Glu_L
 
-// if left CnF Glu activated and PNN inactivated uncomment the next 6 lines
-//variable d0_CnF_Glu   4.2
-//variable kdr_CnF_Glu  2.55e-05
-//driveE kdr_CnF_Glu * t + d0_CnF_Glu -> CnF_Glu_L
-//variable PPN_Glu_to_LGPi_Glu1   0
-//variable PPN_Glu_to_cLGPi_Glu1  0
-//variable PPN_GAT_to_PPN_Glu     0
 
 // if left LPGi Glu stimulated uncomment the next 4 lines
-//variable d0_LPGi_Glu   2.45
-//variable kdr_LPGi_Glu  1.1e-05
-//driveE kdr_LPGi_Glu * t + d0_LPGi_Glu  -> LPGi_Glu1_L
-//driveE kdr_LPGi_Glu * t + d0_LPGi_Glu  -> LPGi_Glu2_L
+variable d0_LPGi_Glu  0 2.45
+variable kdr_LPGi_Glu  1.1e-05
+driveE 0 * t + d0_LPGi_Glu  -> LPGi_Glu1_L
+driveE 0 * t + d0_LPGi_Glu  -> LPGi_Glu2_L
 
 //for control case or
 //if any left GAT neurons are stimulated uncomment the next 4 lines and the corresponding lines below
-//variable d0_CnF_Glu   2.79
+variable d0_CnF_Glu_bl  0 2.79
 //variable kdr_CnF_Glu  0.25e-05
-//driveE kdr_CnF_Glu * t + d0_CnF_Glu -> CnF_Glu_L
-//driveE kdr_CnF_Glu * t + d0_CnF_Glu -> CnF_Glu_R
+driveE 0.0 * t + d0_CnF_Glu_bl -> CnF_Glu_L
+driveE 0.0 * t + d0_CnF_Glu_bl -> CnF_Glu_R
 
 //CnF_GAT stimulated
 variable d0_CnF_GAT   0
-variable kdr_CnF_GAT  0
-driveE kdr_CnF_GAT * t + d0_CnF_GAT -> CnF_GAT_L
+driveE 0 * t + d0_CnF_GAT -> CnF_GAT_L
 
 //PPN_GAT stimulated
 variable d0_PPN_GAT   0
-variable kdr_PPN_GAT  0
-driveE kdr_PPN_GAT * t + d0_PPN_GAT -> PPN_GAT_L
+driveE 0 * t + d0_PPN_GAT -> PPN_GAT_L
 
 //LPGi_GAT stimulated
 variable d0_LPGi_GAT   0
-variable kdr_LPGi_GAT  0
-driveE kdr_LPGi_GAT * t + d0_LPGi_GAT -> LPGi_GAT_L
+driveE 0 * t + d0_LPGi_GAT -> LPGi_GAT_L
 
 // from RG-F
 connectionE RGF_NaP_L_hind  -> InF_L_hind :  F_to_inF + 0 * t
@@ -451,29 +440,6 @@ connectionI CnF_GAT_R -o CnF_Glu_R : CnF_GAT_to_CnF_Glu + 0 * t
 connectionI CnF_GAT_L -o PPN_Glu_L : CnF_GAT_to_PPN_Glu + 0 * t
 connectionI CnF_GAT_R -o PPN_Glu_R : CnF_GAT_to_PPN_Glu + 0 * t
 
-//Simon's drives
-//driveE 1e-05 * t + 0 -> RGF_NaP_L_front
-//driveE 1e-05 * t + 0 -> RGF_NaP_R_front
-//driveE 0 * t + 1 -> RGE_NaP_L_front
-//driveE 0 * t + 1 -> RGE_NaP_R_front
-
-//driveI 1.5e-05 * t + 0 -> V0V_L_front
-//driveI 1.5e-05 * t + 0 -> V0V_R_front
-//driveI 7.5e-05 * t + 0 -> V0D_L_front
-//driveI 7.5e-05 * t + 0 -> V0D_R_front
-//driveI 7.5e-05 * t + 0 -> V0D_diag_L_front
-//driveI 7.5e-05 * t + 0 -> V0D_diag_R_front
-
-//driveE 1.0e-05 * t + 0 -> RGF_NaP_L_hind
-//driveE 1.0e-05 * t + 0 -> RGF_NaP_R_hind
-//driveE 0 * t + 1 -> RGE_NaP_L_hind
-//driveE 0 * t + 1 -> RGE_NaP_R_hind
-
-//driveI 1.5e-05 * t + 0 -> V0V_L_hind
-//driveI 1.5e-05 * t + 0 -> V0V_R_hind
-//driveI 7.5e-05 * t + 0 -> V0D_L_hind
-//driveI 7.5e-05 * t + 0 -> V0D_R_hind
-
 gLeak 	2.8
 gLeak [0:7] 4.5
 gLeak [56:85] 5
@@ -494,7 +460,7 @@ hTauV12	 -35
 hTau0	 80	 
 Vmax	 0	
 Vmin	 -50
-//sigmaNoise 0.0075 1.0
+//sigmaNoise 2.0
 
 
-initialConditions	-55.920078	-51.641972	-21.491720	-35.639797	-22.043705	-37.454517	-44.907143	-49.721371	-59.393818	-60.005093	-37.492096	-45.016365	-67.755806	-67.788857	-59.457329	-59.995716	-61.849171	-62.664959	-60.000305	-59.066238	-42.315670	-45.890461	-48.380825	-59.984398	-46.334351	-53.852894	-43.986309	-47.171570	-39.449089	-37.912262	-42.357056	-55.163944	-34.461632	-39.782787	-37.492538	-45.017799	-48.382637	-59.981125	-34.692379	-42.608669	-46.389870	-59.979351	-59.570225	-60.002865	-49.644260	-44.188583	-50.895142	-57.068607	-58.833954	-60.003361	-29.252132	-35.507793	-59.282440	-60.001152	-39.317017	-43.578243	0.43757886	0.65233570	0.55646032	0.35669383	0.62674695	0.38586906	0.34378222	0.62621748
+//initialConditions	-55.920078	-51.641972	-21.491720	-35.639797	-22.043705	-37.454517	-44.907143	-49.721371	-59.393818	-60.005093	-37.492096	-45.016365	-67.755806	-67.788857	-59.457329	-59.995716	-61.849171	-62.664959	-60.000305	-59.066238	-42.315670	-45.890461	-48.380825	-59.984398	-46.334351	-53.852894	-43.986309	-47.171570	-39.449089	-37.912262	-42.357056	-55.163944	-34.461632	-39.782787	-37.492538	-45.017799	-48.382637	-59.981125	-34.692379	-42.608669	-46.389870	-59.979351	-59.570225	-60.002865	-49.644260	-44.188583	-50.895142	-57.068607	-58.833954	-60.003361	-29.252132	-35.507793	-59.282440	-60.001152	-39.317017	-43.578243	0.43757886	0.65233570	0.55646032	0.35669383	0.62674695	0.38586906	0.34378222	0.62621748

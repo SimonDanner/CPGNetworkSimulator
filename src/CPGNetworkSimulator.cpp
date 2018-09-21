@@ -69,6 +69,7 @@ std::vector<double> CPGNetworkSimulator::setupVariableVector(const std::vector<s
     }
     return values;
 }
+
 void CPGNetworkSimulator::updateVariableVector(const std::vector<double> values){
     if(variableVectorPointers.size()!=values.size()){
         std::cout << "CPGNetworkSimulator::updateVariableVector: values has wrong size" << std::endl;
@@ -76,5 +77,11 @@ void CPGNetworkSimulator::updateVariableVector(const std::vector<double> values)
     }
     for(int i = 0;i < variableVectorPointers.size();++i){
         (*variableVectorPointers[i])=values[i];
+    }
+};
+
+void CPGNetworkSimulator::updateParameter(std::string name, double value){
+    if(name=="sigmaNoise"){
+        std::fill(net->sigmaNoise.begin(),net->sigmaNoise.end(),value);
     }
 };

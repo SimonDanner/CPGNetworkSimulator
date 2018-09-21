@@ -68,6 +68,7 @@ public:
     void updateVariableVector(const std::vector<double> values);
     std::vector<double> getState(){return state.data();};
     void setState(std::vector<double> s){state = myvec(s);};
+    void updateParameter(std::string name, double value);
 };
 
 #endif /* Solver_hpp */

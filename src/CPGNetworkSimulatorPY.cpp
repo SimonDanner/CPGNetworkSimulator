@@ -23,6 +23,7 @@ PYBIND11_MODULE(CPGNetworkSimulator, m) {
         .def("setBodyTilt",&CPGNetworkSimulator::setBodyTilt)
         .def("setupVariableVector",&CPGNetworkSimulator::setupVariableVector)
         .def("updateVariableVector",&CPGNetworkSimulator::updateVariableVector)
+        .def("updateParameter",&CPGNetworkSimulator::updateParameter)
         .def("setLscond", &CPGNetworkSimulator::setLscond)
         .def("getState", &CPGNetworkSimulator::getState)
         .def("setState", &CPGNetworkSimulator::setState);

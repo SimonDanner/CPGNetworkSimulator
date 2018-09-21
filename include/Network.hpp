@@ -125,14 +125,11 @@ public:
     myvec initial;
     myvec gBarLeak;
     myvec gBarNaP;
-    
     myvec ELeak;
     myvec ENa;
     myvec ESynE;
     myvec ESynI;
-    
     myvec Cmem;
-    
     myvec mk;
     myvec mV12;
     
