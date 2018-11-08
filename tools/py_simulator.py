@@ -86,11 +86,13 @@ class simulator:
         for i,(x,y) in enumerate(phase_diffs):
             phases[:,i] = ((M[:,y]-M[:,x])/phase_dur)  % 1.0
 
-        no_nan = ~np.isnan(np.concatenate(
-                    (np.stack((phase_dur,fl_phase_dur,ex_phase_dur),1),phases),1
-                    )).any(axis=1)
-
-        return (phase_dur[no_nan],fl_phase_dur[no_nan],ex_phase_dur[no_nan],phases[no_nan])  
+        if phases.shape[0]!=0:
+            no_nan = ~np.isnan(np.concatenate(
+                        (np.stack((phase_dur,fl_phase_dur,ex_phase_dur),1),phases),1
+                        )).any(axis=1)
+            return (phase_dur[no_nan],fl_phase_dur[no_nan],ex_phase_dur[no_nan],phases[no_nan])
+        else:
+            return (phase_dur,fl_phase_dur,ex_phase_dur,phases)  
 
     @staticmethod
     def classify_gait_simple(duty_factor,phases): 
@@ -128,16 +130,17 @@ class simulator:
         return gaits      
 
     def do_iteration(self):
-        mfq = 0
+        mfq = np.nan
         mphases_ = [] 
         max_std_phases = 1.0
         its=0
         while max_std_phases > self.stdp_limit and its < self.its_limit:
             out = self.run_sim()
             phase_dur,fl_phase_dur,ex_phase_dur, phases = self.calc_phase(self.time_vec,out,self.phase_diffs)
-            mphases_ = circmean(phases[-5:,:],1.0,0.0,0)
-            max_std_phases = np.max(circstd(phases[-5:,:],1.0,0.0,0))
-            mfq = 1.0/np.nanmean(phase_dur[-5:])
+            if len(phase_dur)>5:
+                mphases_ = circmean(phases[-5:,:],1.0,0.0,0)
+                max_std_phases = np.max(circstd(phases[-5:,:],1.0,0.0,0))
+                mfq = 1.0/np.nanmean(phase_dur[-5:])
             its+=1
         gaits = self.classify_gait_simple((ex_phase_dur/phase_dur)[-5:],phases[-5:,:])
         return (mfq, mphases_, gaits[-1:])
@@ -162,10 +165,11 @@ class simulator:
             self.sim.updateVariable(variable_name,v[j])
 
             fq, phases_, gait_ = self.do_iteration()
-            print(gait_)
-            frequency[j,0]=fq
-            gait[j,0]=gait_
-            phases[j,:,0]=phases_
+            #print(gait_)
+            if not np.isnan(fq):
+                frequency[j,0]=fq
+                gait[j,0]=gait_
+                phases[j,:,0]=phases_
             j_start_back=j-1
             if np.isnan(fq) and not go_up_on_nan:
                 j_start_back=j-2
@@ -195,6 +199,7 @@ class simulator:
     def do_2d_bifurcation(self,variable_names,ranges,steps,updown=False):
         v0=ranges[0][0]+(np.arange(0,steps[0],1))/(steps[0]-1.0)*(ranges[0][1]-ranges[0][0])
         frequency = np.zeros(steps+(2,))*np.nan
+        gaits = np.zeros(steps+(2,))*np.nan
         phases = np.zeros(steps+(len(self.phase_diffs),2))*np.nan
 
         paras = futures.map(
@@ -207,11 +212,12 @@ class simulator:
                                 updown=updown),
                         v0)
         v1 = []
-        for i,(v_,fq,ph,_) in enumerate(paras):
+        for i,(v_,fq,ph,g) in enumerate(paras):
             frequency[i,:,:]=fq
             phases[i,:,:,:]=ph
+            gaits[i,:,:]=g
             v1=v_
-        return (v0,v1,frequency,phases)
+        return (v0,v1,frequency,phases,gaits)
 
     def do_noise_iteration(self,value, variable_name,sigma,set_variables=list()):
         self.initialize_simulator()

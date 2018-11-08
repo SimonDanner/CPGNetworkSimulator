@@ -5,12 +5,11 @@ import numpy as np
 import numpy.matlib as npml
 from scipy.stats import circstd, circmean
 import h5py
-from scoop import futures
 
 neurons = ["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"]
 simulator = nsim.CPGNetworkSimulator("./models/MLR_45.txt",["a","b"],(neurons,))
 
-sim='cnf_glu_ppn_i'
+sim='cnf_glu'
 run=True
 
 if sim=='cnf_glu':
@@ -26,7 +25,7 @@ if sim=='cnf_glu_ppn_i':
     simulator.updateVariable('PPN_Glu_to_cLGPi_Glu1', 0.0)
     simulator.updateVariable('PPN_GAT_to_PPN_Glu',    0.0)
 
-steps = 2000
+steps = 50
 
 dt=0.001
 duration = 10.0
@@ -55,16 +54,22 @@ IC=simulator.getState()
 
 def calc_phase(time_vec,out):
     os_=((np.diff((out>0.1).astype(np.int),axis=0)==1).T)
+    of_=((np.diff((out>0.1).astype(np.int),axis=0)==-1).T)
     onsets=npml.repmat(time_vec[:-1],len(neurons),1)[os_]
-    leg=(npml.repmat(np.arange(len(neurons)),len(time_vec)-1,1).T)[os_]
-    times=np.stack((onsets,leg),1)
-    times=times[times[:,0].argsort()]
+    offsets=npml.repmat(time_vec[:-1],len(neurons),1)[of_]
+    leg_os=(npml.repmat(np.arange(len(neurons)),len(time_vec)-1,1).T)[os_]
+    leg_of=(npml.repmat(np.arange(len(neurons)),len(time_vec)-1,1).T)[of_]
+    
+    times_os=np.stack((onsets,leg_os),1)
+    times_os=times_os[times_os[:,0].argsort()]
+    times_of=np.stack((offsets,leg_of),1)
+    times_of=times_of[times_of[:,0].argsort()]
 
-    pdur=np.diff(times[(times[:,1]==0),0])
+    pdur=np.diff(times_os[(times_os[:,1]==0),0])
     phases=np.zeros((len(phase_diffs)))
     std_phases=np.zeros((len(phase_diffs)))
     for i,(x,y) in enumerate(phase_diffs):
-        times_=times[(times[:,1]==x) | (times[:,1]==y)]
+        times_=times_os[(times_os[:,1]==x) | (times_os[:,1]==y)]
         indices = np.where((times_[:-2,1]==x) & (times_[1:-1,1]==y) & (times_[2:,1]==x))
         pdur_=times_[[ind+2 for ind in indices],0]-times_[indices,0]
         phases_=((times_[[ind+1 for ind in indices],0]-times_[indices,0])/pdur_).T

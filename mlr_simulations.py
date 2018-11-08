@@ -112,12 +112,16 @@ if __name__ == "__main__":
     filename = "./models/MLR_45.txt"
 
     cpg_sim = nsim.simulator(neurons=neurons,filename=filename)
-    do_sim=22
+    do_sim=30
     if do_sim==0:
         v,fq, ph, gait = cpg_sim.do_1d_bifurcation('d0_CnF_Glu_L',[3.95,5.3675],200)
         plot_1d_bifurcation_diagram(v,fq,ph,gait)   
+
+    if do_sim==1:
+        v,fq, ph, gait = cpg_sim.do_1d_bifurcation('d0_PPN_Glu',[4.0,5.5],50)
+        plot_1d_bifurcation_diagram(v,fq,ph,gait)
         
-    elif do_sim==1:
+    elif do_sim==2:
         cpg_sim.initialize_simulator()
         cpg_sim.sim.updateVariable('PPN_Glu_to_LGPi_Glu1',  0.0)
         cpg_sim.sim.updateVariable('PPN_Glu_to_cLGPi_Glu1', 0.0)
@@ -125,12 +129,12 @@ if __name__ == "__main__":
         
         v,fq, ph, gait = cpg_sim.do_1d_bifurcation('d0_CnF_Glu_L',[4.2,6.8775],50)
         plot_1d_bifurcation_diagram(v,fq,ph,gait) 
-    elif do_sim==2:
+    elif do_sim==3:
         v,fq, ph, gait = cpg_sim.do_1d_bifurcation('d0_LPGi_Glu',[2.45,2.45+1.1],50)
         plot_1d_bifurcation_diagram(v,fq,ph,gait)
     
     elif do_sim==11:
-        v0,v1,fq,ph = cpg_sim.do_2d_bifurcation(('d0_CnF_GAT','d0_CnF_Glu_bl'),([1.1,3.1],[2.78,3.1]),(20,20))
+        v0,v1,fq,ph,gaits = cpg_sim.do_2d_bifurcation(('d0_CnF_GAT','d0_CnF_Glu_bl'),([1.1,3.1],[2.78,3.1]),(20,20))
         plot_2d_bifurcation_diagram(v0,v1,fq,ph)
     elif do_sim==12:
         v0,v1,fq,ph = cpg_sim.do_2d_bifurcation(('d0_PPN_GAT','d0_CnF_Glu_bl'),([1.1,3.0],[2.78,3.1]),(20,20))
@@ -140,7 +144,7 @@ if __name__ == "__main__":
         plot_2d_bifurcation_diagram(v0,v1,fq,ph)
 
     elif do_sim==20:
-        v,fqs,fl_phase_durs,ex_phase_durs,phases,gaits = cpg_sim.do_noise_simulation('d0_CnF_Glu_L',[3.95,5.3675],50,1.0)
+        v,fqs,fl_phase_durs,ex_phase_durs,phases,gaits = cpg_sim.do_noise_simulation('d0_CnF_Glu_L',[3.95,5.3675],106,1.0)
         #plot_noise_phase_fq_kde(fqs,phases)
         #import IPython; IPython.embed()
         plot_noise_gait_fq(fqs,gaits)

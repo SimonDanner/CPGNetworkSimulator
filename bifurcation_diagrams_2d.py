@@ -10,8 +10,8 @@ from scoop import futures
  
 simulator = nsim.CPGNetworkSimulator("./models/MLR_45.txt",["a","b"],(["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"],))
 
-variable_names = ('d0_PPN_GAT','d0_CnF_Glu')
-ranges = ([1.0,2.5],[2.6,3.1])
+variable_names = ('d0_CnF_GAT','d0_CnF_Glu_bl')
+ranges = ([1.1,2.9],[2.75,3.1])
 ofilename='cnf_glu.h5'
 steps = (20,20)
 
