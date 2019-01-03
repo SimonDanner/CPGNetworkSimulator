@@ -20,16 +20,21 @@ class simulator:
         self.duration = kwargs.get('duration',10.0)
         self.phase_diffs = kwargs.get('phase_diffs',[(0,1),(2,3),(0,2),(0,3),(1,3),(1,2)])
         self.phase_diff_names = kwargs.get('phase_diff_names',['L-R hind','L-R fore','homolateral','diagonal','homolateral','diagonal'])
-        
+        self.alphainit = 0.0
 
     def initialize_simulator(self):
         if not self.initialized:
             fn = os.path.join(os.path.dirname(__file__),"..",self.filename)
             self.sim = nsim.CPGNetworkSimulator(fn,["a","b"],(self.neurons,))
-            self.sim.setAlpha(0.0)
+            self.sim.setAlpha(self.alphainit)
             self.setDuration(self.duration)
             self.initialized=True
             
+    def updateVariable(self,name,value):
+        if(name=="alpha"):
+            self.sim.setAlpha(value)
+        else:
+            self.sim.updateVariable(name,value)
 
     def setDuration(self,dur):
         self.duration = dur
@@ -157,12 +162,12 @@ class simulator:
         go_up_on_nan=True
         #self.sim.setState(IC)
 
-        self.sim.updateVariable(variable_name,v[0])
+        self.updateVariable(variable_name,v[0])
         for r in range(10):
             self.run_sim()
         for j in range(0,steps):
             IChist.append(self.sim.getState())
-            self.sim.updateVariable(variable_name,v[j])
+            self.updateVariable(variable_name,v[j])
 
             fq, phases_, gait_ = self.do_iteration()
             #print(gait_)
@@ -181,7 +186,7 @@ class simulator:
         if updown:
             self.sim.setState(IChist[j_start_back])
             for j in np.arange(j_start_back,-1,-1):
-                self.sim.updateVariable(variable_name,v[j])
+                self.updateVariable(variable_name,v[j])
                 fq, phases_, gait_ = self.do_iteration()
                 frequency[j,1]=fq
                 gait[j,1]=gait_
@@ -193,7 +198,7 @@ class simulator:
     def do_1d_bifurcation_helper(self,at_value,bi_variable_name,bi_range,bi_steps,at_variable_name,updown=True):
         self.initialize_simulator()
         self.its_limit=1
-        self.sim.updateVariable(at_variable_name,at_value)
+        self.updateVariable(at_variable_name,at_value)
         return self.do_1d_bifurcation(bi_variable_name,bi_range,bi_steps,updown)
 
     def do_2d_bifurcation(self,variable_names,ranges,steps,updown=False):
@@ -222,9 +227,9 @@ class simulator:
     def do_noise_iteration(self,value, variable_name,sigma,set_variables=list()):
         self.initialize_simulator()
         self.sim.updateParameter('sigmaNoise',sigma)
-        self.sim.updateVariable(variable_name,value)
+        self.updateVariable(variable_name,value)
         for (name,value) in set_variables:
-            self.sim.updateVariable(name,value)
+            self.updateVariable(name,value)
         
         out = self.run_sim()
         phase_dur,fl_phase_dur,ex_phase_dur, phases = self.calc_phase(self.time_vec,out,self.phase_diffs)

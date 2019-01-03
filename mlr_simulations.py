@@ -17,28 +17,27 @@ For gait-frequency / phase-frquency plots under application of noise use index 2
 
 
 """
-
 import tools.py_simulator as nsim
 from tools.plt import plot_1d_bifurcation_diagram, plot_2d_bifurcation_diagram, plot_noise_phase_fq, plot_noise_gait_fq
 from optparse import OptionParser
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    neurons = ["RGF_NaP_L_hind", "RGF_NaP_R_hind",
+    neurons = ["RGF_NaP_L_hind", "RGF_NaP_R_hind",      # neurons to be read every time step 
                "RGF_NaP_L_front", "RGF_NaP_R_front"]
-    filename = "./models/MLR_45.txt"
+    filename = "./models/MLR_45.txt" #  network model configuration file 
 
     #Note: the resolution of all calculations has been reduced to speed up simulation time.
-    #Change following three valuse to increase number of steps
-    steps_1D = 50
-    steps_2D = (20,20)
-    steps_noise = 106
+    #Change following three values to increase number of steps
+    steps_1D = 50       #number of steps for 1D-bifurcation diagrams
+    steps_2D = (20,20)  #number of steps for 2D-bifurcation diagrams
+    steps_noise = 106   #number of steps for noise simulations
 
     parser = OptionParser()
     parser.add_option("-s", "--simulation", dest="sim",default=0,type=int)
     options, args = parser.parse_args()
 
-    cpg_sim = nsim.simulator(neurons=neurons, filename=filename)
+    cpg_sim = nsim.simulator(neurons=neurons, filename=filename) # instantiate simulator
 
     if options.sim == 0:
         """Bifurcation diagram unilateral stimulation of glutaminergic neurons in CNF"""
@@ -46,7 +45,7 @@ if __name__ == "__main__":
             'd0_CnF_Glu_L', [3.95, 5.3675], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
 
-    if options.sim == 1:
+    elif options.sim == 1:
         """Bifurcation diagram unilateral stimulation of glutaminergic neurons in PPN"""
         v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
             'd0_PPN_Glu', [4.0, 5.5], steps_1D)
@@ -101,7 +100,6 @@ if __name__ == "__main__":
             'd0_PPN_Glu', [4.0, 5.5], steps_noise, 1.0)
         plot_noise_gait_fq(fqs, gaits)
         plot_noise_phase_fq(fqs, phases)
-
         plt.show()
     elif options.sim == 22:
         """Unilateral stimulation of CnF_Glu neurons while PPN is inactivated"""

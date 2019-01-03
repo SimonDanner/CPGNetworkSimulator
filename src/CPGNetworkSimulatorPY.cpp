@@ -4,7 +4,8 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(CPGNetworkSimulator, m) {
+PYBIND11_PLUGIN(_CPGNetworkSimulator) {
+    py::module m("_CPGNetworkSimulator", "Network Simulator");
     py::class_<LimbSensorCondition>(m, "LimbSensorCondition")
         .def(py::init<>())
         .def(py::init<int>())
@@ -27,5 +28,6 @@ PYBIND11_MODULE(CPGNetworkSimulator, m) {
         .def("setLscond", &CPGNetworkSimulator::setLscond)
         .def("getState", &CPGNetworkSimulator::getState)
         .def("setState", &CPGNetworkSimulator::setState);
+    return m.ptr();
 }
 
