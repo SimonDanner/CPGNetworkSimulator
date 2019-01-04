@@ -25,6 +25,6 @@ root_dir> python -m pip install .
 ## Usage
 mlr_simulation.py contains scripts to run all simulations of Ausborn et al.
 ```
-python3 [-m scoop] mlr_simulation.py -s [index of simulation]
+python3 [-m scoop] mlr_simulations.py -s [index of simulation]
 ```
-For more detailed instructions refer to the comments in mlr_simulation.py.
+For more detailed instructions refer to the comments in mlr_simulations.py.
