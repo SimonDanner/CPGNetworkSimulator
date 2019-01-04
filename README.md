@@ -14,7 +14,7 @@ root_dir> python -m pip install .
 ```
 ### Requirements: 
 - python 3.5 or newer
-- C++ toolchaing
+- C++ toolchain
 - boost 1.65 or newer (only headers for odeint are required)
 - yaml-cpp
 - pybind11
