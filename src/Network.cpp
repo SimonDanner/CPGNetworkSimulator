@@ -154,7 +154,7 @@ myvec Network::genInitialCond() const{
             ret[i]=ELeak[i];
         }
         for( int i=0;i<N_NaP;++i){
-            ret[N_Neurons+i]=(int((i+1)/2)%2)*0.3+0.3;
+            ret[N_Neurons+i]=1./(1.+exp((ELeak[i]-hV12[i])/hk[i]));//(int((i+1)/2)%2)*0.3+0.3;
         }
     }
     return ret;

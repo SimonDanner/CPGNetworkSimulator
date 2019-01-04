@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     neurons = ["RGF_NaP_L_hind", "RGF_NaP_R_hind",      # neurons to be read every time step 
                "RGF_NaP_L_front", "RGF_NaP_R_front"]
-    filename = "./models/MLR_45.txt" #  network model configuration file 
+    filename = "./models/Ausborn-etal-eLife.txt" #  network model configuration file 
 
     #Note: the resolution of all calculations has been reduced to speed up simulation time.
     #Change following three values to increase number of steps
@@ -72,17 +72,19 @@ if __name__ == "__main__":
     elif options.sim == 10:
         """2D bifurcation diagram stimulation of unilateral CnF GAT vs bilateral CnF Glu"""
         v0, v1, fq, ph, gaits = cpg_sim.do_2d_bifurcation(
-            ('d0_CnF_GAT', 'd0_CnF_Glu_bl'), ([1.1, 3.1], [2.78, 3.1]), steps_2D)
+            ('d0_CnF_GAT', 'd0_CnF_Glu_bl'), ([1.1, 3.0], [2.78, 3.1]), steps_2D)
         plot_2d_bifurcation_diagram(v0, v1, fq, ph)
+        
 
     elif options.sim == 11:
         """2D bifurcation diagram stimulation of unilateral PPN GAT vs bilateral CnF Glu"""
-        v0, v1, fq, ph = cpg_sim.do_2d_bifurcation(
+        v0, v1, fq, ph, gaits = cpg_sim.do_2d_bifurcation(
             ('d0_PPN_GAT', 'd0_CnF_Glu_bl'), ([1.1, 3.0], [2.78, 3.1]), steps_2D)
         plot_2d_bifurcation_diagram(v0, v1, fq, ph)
+        
     elif options.sim == 12:
         """2D bifurcation diagram stimulation of unilateral LPGi GAT vs bilateral CnF Glu"""
-        v0, v1, fq, ph = cpg_sim.do_2d_bifurcation(
+        v0, v1, fq, ph, gaits = cpg_sim.do_2d_bifurcation(
             ('d0_LPGi_GAT', 'd0_CnF_Glu_bl'), ([1.1, 3.0], [2.78, 3.1]), steps_2D)
         plot_2d_bifurcation_diagram(v0, v1, fq, ph)
 

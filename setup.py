@@ -43,7 +43,7 @@ def cpp_flag(compiler):
                            'is needed!')
 
 MAJOR_VERSION=1
-MINOR_VERSION=2
+MINOR_VERSION=0
 print(str(MAJOR_VERSION) + '.' + str(MINOR_VERSION))
 module1 = Extension('_CPGNetworkSimulator',
                     extra_compile_args=["-std=c++14", "-Ofast", "-march=native"],

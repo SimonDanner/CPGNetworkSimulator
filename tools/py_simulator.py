@@ -21,6 +21,7 @@ class simulator:
         self.phase_diffs = kwargs.get('phase_diffs',[(0,1),(2,3),(0,2),(0,3),(1,3),(1,2)])
         self.phase_diff_names = kwargs.get('phase_diff_names',['L-R hind','L-R fore','homolateral','diagonal','homolateral','diagonal'])
         self.alphainit = 0.0
+        self.doPreRun = True
 
     def initialize_simulator(self):
         if not self.initialized:
@@ -29,6 +30,10 @@ class simulator:
             self.sim.setAlpha(self.alphainit)
             self.setDuration(self.duration)
             self.initialized=True
+            if self.doPreRun:
+                for i in range(10):
+                    self.run_sim()
+                self.IC = self.sim.getState()
             
     def updateVariable(self,name,value):
         if(name=="alpha"):
@@ -123,15 +128,14 @@ class simulator:
                         np.logical_and(lr_hind>=0.75,lr_hind<0.975)))   
         bound = np.logical_and(hl_alt,
                     np.logical_or(lr_hind<=0.025,lr_hind>=0.975))
-
-        gaits = np.zeros((len(duty_factor),),dtype=int)
-        gaits[walk]=1
-        gaits[trot]=2
-        gaits[gallop]=3
-        gaits[bound]=4
-        #if not (((walk != trot) != (gallop != bound)).all()):
-        #    print(gaits[~( ((walk != trot) != (gallop != bound)))])
-            #import IPython;IPython.embed()
+        if len(duty_factor) > 0:
+            gaits = np.zeros((len(duty_factor),),dtype=int)
+            gaits[walk]=1
+            gaits[trot]=2
+            gaits[gallop]=3
+            gaits[bound]=4
+        else:
+            gaits = [np.nan]
         return gaits      
 
     def do_iteration(self):
@@ -142,7 +146,7 @@ class simulator:
         while max_std_phases > self.stdp_limit and its < self.its_limit:
             out = self.run_sim()
             phase_dur,fl_phase_dur,ex_phase_dur, phases = self.calc_phase(self.time_vec,out,self.phase_diffs)
-            if len(phase_dur)>5:
+            if len(phase_dur)>10:
                 mphases_ = circmean(phases[-5:,:],1.0,0.0,0)
                 max_std_phases = np.max(circstd(phases[-5:,:],1.0,0.0,0))
                 mfq = 1.0/np.nanmean(phase_dur[-5:])
@@ -163,14 +167,11 @@ class simulator:
         #self.sim.setState(IC)
 
         self.updateVariable(variable_name,v[0])
-        for r in range(10):
-            self.run_sim()
         for j in range(0,steps):
             IChist.append(self.sim.getState())
             self.updateVariable(variable_name,v[j])
 
             fq, phases_, gait_ = self.do_iteration()
-            #print(gait_)
             if not np.isnan(fq):
                 frequency[j,0]=fq
                 gait[j,0]=gait_
@@ -197,7 +198,8 @@ class simulator:
 
     def do_1d_bifurcation_helper(self,at_value,bi_variable_name,bi_range,bi_steps,at_variable_name,updown=True):
         self.initialize_simulator()
-        self.its_limit=1
+        self.sim.setState(self.IC)
+        self.its_limit=5
         self.updateVariable(at_variable_name,at_value)
         return self.do_1d_bifurcation(bi_variable_name,bi_range,bi_steps,updown)
 
@@ -206,7 +208,6 @@ class simulator:
         frequency = np.zeros(steps+(2,))*np.nan
         gaits = np.zeros(steps+(2,))*np.nan
         phases = np.zeros(steps+(len(self.phase_diffs),2))*np.nan
-
         paras = futures.map(
                         functools.partial(
                                 self.do_1d_bifurcation_helper,
@@ -239,6 +240,7 @@ class simulator:
     def do_noise_simulation(self,variable_name,range_,steps,sigma,set_variables=list()):
         v=range_[0]+(np.arange(0,steps,1))/(steps-1.0)*(range_[1]-range_[0])
         self.duration = 100.0
+        self.doPreRun = False
         fqs = list()
         fl_phase_durs = list()
         ex_phase_durs = list()
