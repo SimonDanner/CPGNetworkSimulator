@@ -1,21 +1,21 @@
 """
-mlr_simulation.py
+mlr_simulations.py
 
-Script to perform all simulations illustrated in "Computational modeling of 
-brainstem circuits controlling locomotor frequency and gait " submitted to 
-eLife.
+Script to perform all simulations illustrated in Ausborn J, Shevtsova NA,
+Caggiano V, Danner SM, Rybak IA. "Computational modeling of brainstem 
+circuits controlling locomotor frequency and gait" submitted to eLife.
 
 Usage:
-python3 [-m scoop] mlr_simulation -s [index of simulation]
+python3 [-m scoop] mlr_simulations.py -s [index of simulation]
 
-e.g. "python3 mlr_simulation -s 0" calculates 1D bifurcation diagrams for CNF stimluation
+e.g. "python3 mlr_simulations.py -s 0" calculates 1D bifurcation diagrams for CNF stimulation
 
 For 1D bifurcation diagrams use index 0-3 (Figure 3, 4A)
 For 2D bifurcation diagrams use index 10-13 (Figure 6)
-For gait-frequency / phase-frquency plots under application of noise use index 20-23
+For gait-frequency / phase-frequency plots under application of noise use index 20-23
 (For more details see comments below)
 
-
+2D bifurcation diagrams and noise-simulations support parallelization through scoop.
 """
 import tools.py_simulator as nsim
 from tools.plt import plot_1d_bifurcation_diagram, plot_2d_bifurcation_diagram, plot_noise_phase_fq, plot_noise_gait_fq
