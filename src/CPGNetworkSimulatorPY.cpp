@@ -49,8 +49,8 @@ PYBIND11_PLUGIN(_CPGNetworkSimulator) {
         .def("setState", &CPGNetworkSimulator::setState)
         .def("getEleak", &CPGNetworkSimulator::getEleak)
         .def("setEleak", &CPGNetworkSimulator::setEleak)
-        .def("getIepsp", &CPGNetworkSimulator::getEleak)
-        .def("getIipsp", &CPGNetworkSimulator::getEleak);
+        .def("getIepsp", &CPGNetworkSimulator::getIepsp)
+        .def("getIipsp", &CPGNetworkSimulator::getIipsp);
     return m.ptr();
 }
 

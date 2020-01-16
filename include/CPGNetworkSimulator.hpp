@@ -56,6 +56,8 @@ private:
     double t_last_dense=0.0;
     OdeSystemNetwork sys;
     std::vector< std::vector<double> > act;
+    std::vector< std::vector<double> > Iipsp;
+    std::vector< std::vector<double> > Iepsp;
     std::vector< std::vector<std::string> > mnnames;
     std::vector<double*> variableVectorPointers;
     std::vector<std::string> variableVectorNames;
@@ -70,6 +72,8 @@ public:
     void controlled_step(double dt);
     void dense_step(double dt);
     const std::vector<std::vector<double>>& getAct(){return act;};
+    const std::vector<std::vector<double>>& getIepsp(){return Iepsp;};
+    const std::vector<std::vector<double>>& getIipsp(){return Iipsp;};
     bool updateVariable(const std::string var, double value);
     double getVariableValue(const std::string var);
     void setLscond(std::vector<LimbSensorCondition>& ls_){

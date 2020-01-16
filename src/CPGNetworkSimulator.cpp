@@ -33,10 +33,16 @@ void CPGNetworkSimulator::initialize(){
     integrate_const( controlled_stepper, sys, state , 0.0 , 10., 0.002);
     for(int i = 0;i<net->in_Act.size();++i){
         std::vector<double> v_;
+        std::vector<double> ie_;
+        std::vector<double> ii_;
         for(int j = 0;j<net->in_Act[0].size();++j){
             v_.push_back(net->transV[net->in_Act[i][j]]);
+            ie_.push_back(net->Iepsp[net->in_Act[i][j]]);
+            ii_.push_back(net->Iipsp[net->in_Act[i][j]]);
         }
         act.push_back(v_);
+        Iepsp.push_back(ie_);
+        Iipsp.push_back(ii_);
     }
 }
 
@@ -47,6 +53,8 @@ void CPGNetworkSimulator::step(double dt_){
     for(int i = 0;i<net->in_Act.size();++i){
         for(int j = 0;j<net->in_Act[0].size();++j){
             act[i][j] = net->transV[net->in_Act[i][j]];
+            Iepsp[i][j] = net->Iepsp[net->in_Act[i][j]];
+            Iipsp[i][j] = net->Iipsp[net->in_Act[i][j]];
         }
     }
     
@@ -59,6 +67,8 @@ void CPGNetworkSimulator::controlled_step(double dt_){
     for(int i = 0;i<net->in_Act.size();++i){
         for(int j = 0;j<net->in_Act[0].size();++j){
             act[i][j] = net->transV[net->in_Act[i][j]];
+            Iepsp[i][j] = net->Iepsp[net->in_Act[i][j]];
+            Iipsp[i][j] = net->Iipsp[net->in_Act[i][j]];
         }
     }
     
@@ -75,7 +85,9 @@ void CPGNetworkSimulator::dense_step(double dt_){
     for(int i = 0;i<net->in_Act.size();++i){
         for(int j = 0;j<net->in_Act[0].size();++j){
             int index = net->in_Act[i][j];
-            act[i][j] = std::min(1.0,pos(state[index]-net->Vmin[index])/(net->Vmax[index]-net->Vmin[index]));
+            act[i][j] = net->transV[net->in_Act[i][j]];
+            Iepsp[i][j] = net->Iepsp[net->in_Act[i][j]];
+            Iipsp[i][j] = net->Iipsp[net->in_Act[i][j]];
         }
     }
     

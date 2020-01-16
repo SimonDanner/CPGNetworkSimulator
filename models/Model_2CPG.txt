@@ -1,0 +1,95 @@
+N_NaP 4
+N_Normal 10
+simDuration 92000
+scalingFactor 15
+stepwise 200 10000 0. 0.4
+
+neuron RGF_NaP_L
+neuron RGF_NaP_R
+neuron RGE_NaP_L
+neuron RGE_NaP_R
+
+neuron InF_L
+neuron InF_R
+neuron InE_L
+neuron InE_R
+
+neuron CINi_L
+neuron CINi_R
+neuron CINe_L
+neuron CINe_R
+neuron CINe2_L
+neuron CINe2_R
+
+variable LR_e 0.1
+variable LR_i 0.5
+
+variable LR_e2 0.5
+variable dCINe2L 0.0
+variable dCINe2R 0.0
+
+variable dRGR 0.0
+
+//CPG
+connectionE RGF_NaP_L -> InF_L : 4 + 0 * t
+connectionE RGF_NaP_R -> InF_R : 4 + 0 * t
+
+connectionE RGE_NaP_L -> InE_L : 4 + 0 * t
+connectionE RGE_NaP_R -> InE_R : 4 + 0 * t
+
+connectionI InF_L -> RGE_NaP_L : 10 + 0 * t
+connectionI InF_R -> RGE_NaP_R : 10 + 0 * t
+
+connectionI InE_L -> RGF_NaP_L : 3. + 0 * t
+connectionI InE_R -> RGF_NaP_R : 3. + 0 * t
+
+connectionE RGF_NaP_L -> CINi_L : 4 + 0 * t
+connectionE RGF_NaP_R -> CINi_R : 4 + 0 * t
+
+connectionE RGF_NaP_L -> CINe_L : 4 + 0 * t
+connectionE RGF_NaP_R -> CINe_R : 4 + 0 * t
+
+connectionE RGE_NaP_L -> CINe2_L : 4 + 0 * t
+connectionE RGE_NaP_R -> CINe2_R : 4 + 0 * t
+
+//Left-right connections
+connectionI CINi_L -> RGF_NaP_R : LR_i + 0 * t
+connectionI CINi_R -> RGF_NaP_L : LR_i + 0 * t
+
+connectionE CINe_L -> RGF_NaP_R : LR_e + 0 * t
+connectionE CINe_R -> RGF_NaP_L : LR_e + 0 * t
+
+connectionE CINe2_L -> RGE_NaP_R : LR_e2 + 0 * t
+connectionE CINe2_R -> RGE_NaP_L : LR_e2 + 0 * t
+
+
+
+driveE 1.0e-05 * t + 0.0 -> RGF_NaP_L
+driveE 1.0e-05 * t + dRGR -> RGF_NaP_R
+driveE 0 * t + 1 -> RGE_NaP_L
+driveE 0 * t + 1 -> RGE_NaP_R
+driveE 0 * t + dCINe2L -> CINe2_L
+driveE 0 * t + dCINe2R -> CINe2_R
+
+
+gLeak 	2.8
+gLeak [0:3] 4.5
+gBarNaP	 4.5	
+Eleak	 -60
+Eleak [0:3] -62.5
+ENa	 50	
+ESynE	 -10	
+ESynI	 -75	
+Cmem	 10	
+mk	 -6	
+mV12	 -40	
+hk	 4	
+hV12	 -45	
+htau	 160	
+hTauK	 15	
+hTauV12	 -35	
+hTau0	 80	 
+Vmax	 0	
+Vmin	 -50
+sigmaNoise 0.75
+

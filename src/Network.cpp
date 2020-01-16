@@ -822,6 +822,8 @@ inline double sech(double z){return 2/(exp(z)+exp(-z));};
 //integration step
 void Network::step(const myvec &x, myvec &dxdt, double t){
     myvec randV = randomGen.get(t);
+    Iepsp*=0.0;
+    Iipsp*=0.0;
     for (int i = 0;i<N_Neurons;++i){
         switch(outputFunction[i]){
             case 0:
@@ -843,13 +845,13 @@ void Network::step(const myvec &x, myvec &dxdt, double t){
     for (int i = 0;i<N_Neurons;++i){
         dxdt[i]=(-gBarLeak[i]*(x[i]-ELeak[i]));
         for (auto it=connE(i).begin();it!=connE(i).end();++it){
-            Iepsp[i]=pos(*it->weight)*transV(it->from)*(x[i]-ESynE[i]);
-            dxdt[i]-=Iepsp[i];
+            Iepsp[i]+=pos(*it->weight)*transV(it->from)*(x[i]-ESynE[i]);    
         }
+        dxdt[i]-=Iepsp[i];
         for (auto it=connI(i).begin();it!=connI(i).end();++it){
-            Iipsp[i]=pos(*it->weight)*transV(it->from)*(x[i]-ESynI[i]);
-            dxdt[i]-=Iipsp[i];
+            Iipsp[i]+=pos(*it->weight)*transV(it->from)*(x[i]-ESynI[i]);   
         }
+        dxdt[i]-=Iipsp[i];
         dxdt[i]+=-(randV[i]*sigmaNoise[i]);
         dxdt[i]/=Cmem[i];
         if (i < N_NaP){
