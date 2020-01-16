@@ -1,0 +1,133 @@
+N_NaP 4
+N_Normal 14
+simDuration 92000
+scalingFactor 15
+stepwise 200 10000 0. 0.4
+
+neuron RGF_NaP_L
+neuron RGF_NaP_R
+neuron RGE_NaP_L
+neuron RGE_NaP_R
+
+neuron InF_L
+neuron InF_R
+neuron InE_L
+neuron InE_R
+
+neuron CIN_V0D_L
+neuron CIN_V0D_R
+neuron CIN_V0V_L
+neuron CIN_V0V_R
+neuron CIN_In_L
+neuron CIN_In_R
+
+neuron CIN_V3_L
+neuron CIN_V3_R
+
+neuron InV0V_L
+neuron InV0V_R
+
+variable InE_to_F 1 3.0
+
+variable F_to_V0D 4.0
+
+variable V0D_to_RGF 0.1
+
+variable V0V_to_InV0V 10.0
+variable InV0V_to_RGF 0.55 1.5
+
+variable V3_to_RGE 1.0 2
+variable V3_to_InE  0.5 0 2  2
+variable CINIn_to_RGF .05 125
+
+variable dV3L 0.0
+variable dV3R 0.0
+
+variable dRGR 0.0
+
+//CPG
+connectionE RGF_NaP_L -> InF_L : 4 + 0 * t
+connectionE RGF_NaP_R -> InF_R : 4 + 0 * t
+
+connectionE RGE_NaP_L -> InE_L : 4 + 0 * t
+connectionE RGE_NaP_R -> InE_R : 4 + 0 * t
+
+connectionI InF_L -> RGE_NaP_L : 10 + 0 * t
+connectionI InF_R -> RGE_NaP_R : 10 + 0 * t
+
+connectionI InE_L -> RGF_NaP_L : InE_to_F + 0 * t
+connectionI InE_R -> RGF_NaP_R : InE_to_F + 0 * t
+
+connectionE RGF_NaP_L -> CIN_V0D_L : F_to_V0D + 0 * t
+connectionE RGF_NaP_R -> CIN_V0D_R : F_to_V0D + 0 * t
+
+connectionE RGF_NaP_L -> CIN_V0V_L : 6 + 0 * t
+connectionE RGF_NaP_R -> CIN_V0V_R : 6 + 0 * t
+
+connectionE RGE_NaP_L -> CIN_V3_L : 4 + 0 * t
+connectionE RGE_NaP_R -> CIN_V3_R : 4 + 0 * t
+
+connectionE RGE_NaP_L -> CIN_In_L : 3 + 0 * t
+connectionE RGE_NaP_R -> CIN_In_R : 3 + 0 * t
+
+//Left-right connections
+connectionI CIN_V0D_L -> RGF_NaP_R : V0D_to_RGF + 0 * t
+connectionI CIN_V0D_R -> RGF_NaP_L : V0D_to_RGF + 0 * t
+
+connectionE CIN_V0V_L -> InV0V_R : V0V_to_InV0V + 0 * t
+connectionE CIN_V0V_R -> InV0V_L : V0V_to_InV0V + 0 * t
+
+connectionI InV0V_R -> RGF_NaP_R : InV0V_to_RGF + 0 * t
+connectionI InV0V_L -> RGF_NaP_L : InV0V_to_RGF + 0 * t
+
+connectionE CIN_V3_L -> RGE_NaP_R : V3_to_RGE + 0 * t
+connectionE CIN_V3_R -> RGE_NaP_L : V3_to_RGE + 0 * t
+
+connectionE CIN_V3_L -> InE_R : V3_to_InE + 0 * t
+connectionE CIN_V3_R -> InE_L : V3_to_InE + 0 * t
+
+connectionI CIN_In_L -> RGF_NaP_R : CINIn_to_RGF + 0 * t
+connectionI CIN_In_R -> RGF_NaP_L : CINIn_to_RGF + 0 * t
+
+
+//driveI 0 * t + dV3L -> RGF_NaP_L
+//driveI 0 * t + dV3R -> RGF_NaP_R
+
+driveE 0 * t + dV3L -> CIN_V3_L
+driveE 0 * t + dV3R -> CIN_V3_R
+
+//driveE 0 * t + dV3L -> RGE_NaP_L
+//driveE 0 * t + dV3R -> RGE_NaP_R
+
+//driveE 0 * t + dV3L -> CIN_In_L
+//driveE 0 * t + dV3R -> CIN_In_R
+
+
+gLeak 	2.8
+gLeak neurons RGF_NaP	4.5
+gLeak neurons RGE_NaP	2
+//gLeak neurons InE	5.0
+gBarNaP	 4.5
+gBarNaP neurons RGE_NaP	1. 
+Eleak	 -60
+Eleak neurons RGF_NaP -63
+Eleak neurons RGE_NaP -50
+
+
+
+ENa	 50	
+ESynE	 -10	
+ESynI	 -75	
+Cmem	 10	
+mk	 -8
+mV12	 -38	
+hk	 8
+hV12	 -45
+htau	 4000	
+hTauK	 20	
+hTauV12	 -45
+hTau0	 2000	 
+Vmax	 0	
+Vmin	 -50
+sigmaNoise 0.02
+
