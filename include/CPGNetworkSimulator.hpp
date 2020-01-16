@@ -35,6 +35,8 @@ struct OdeSystemNetwork
 
 
 typedef runge_kutta_cash_karp54< myvec > stepper_type;
+typedef boost::numeric::odeint::result_of::make_dense_output<
+    runge_kutta_dopri5< myvec > >::type dense_stepper_type;
 
 struct UpdateList{
     std::string name;
@@ -48,8 +50,10 @@ class CPGNetworkSimulator{
 private:
     stepper_type stepper;
     controlled_runge_kutta< stepper_type> controlled_stepper = make_controlled( 1.0e-6 , 1.0e-6 , stepper_type() );;
+    dense_stepper_type dense_stepper = make_dense_output( 1.0e-6 , 1.0e-6 , runge_kutta_dopri5< myvec >() );
     int N_last_update=0;
     double t0=0.0;
+    double t_last_dense=0.0;
     OdeSystemNetwork sys;
     std::vector< std::vector<double> > act;
     std::vector< std::vector<std::string> > mnnames;
@@ -64,8 +68,10 @@ public:
     void setAlpha(double alpha){net->alpha = alpha;};
     void step(double dt);
     void controlled_step(double dt);
+    void dense_step(double dt);
     const std::vector<std::vector<double>>& getAct(){return act;};
     bool updateVariable(const std::string var, double value);
+    double getVariableValue(const std::string var);
     void setLscond(std::vector<LimbSensorCondition>& ls_){
         net->setLscond(ls_);
     }
@@ -80,6 +86,12 @@ public:
     std::vector<double> getState(){return state.data();};
     void setState(std::vector<double> s){state = myvec(s);};
     void updateParameter(std::string name, double value);
+    std::vector<double> getEleak(){
+        return net->ELeak.data();
+    }
+    void setEleak(std::vector<double> el){
+        net->ELeak = myvec(el);
+    }
 };
 
 #endif /* Solver_hpp */

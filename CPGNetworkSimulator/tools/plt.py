@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_1d_bifurcation_diagram(v,fq,ph,gait):
+def plot_1d_bifurcation_diagram(v,fq,ph,gait,fqmax=12.0):
     _, (ax1, ax2, ax3, ax4,ax5,ax6) = plt.subplots(6, 1, sharex='all')
 
     ax1.plot(v,fq[:,0],'b',linewidth=1,)
     ax1.plot(v,fq[:,1],'r',linewidth=1)
-    ax1.set_ylim([0.0, 12.0])
+    ax1.set_ylim([0.0, fqmax])
     ax2.plot(v,ph[:,0,0],'b.',markersize=1.5)
     ax2.plot(v,ph[:,0,1],'r.',markersize=1.5)
     ax2.plot(v,1-ph[:,0,0],'b.',markersize=1.5)
@@ -37,7 +37,7 @@ def plot_1d_bifurcation_diagram(v,fq,ph,gait):
     ax6.set_yticklabels(['walk','trot','gallop','bound'])
     ax6.set_ylim([.25, 4.75])
     
-    plt.show()  
+    #plt.show()  
 
 def plot_2d_bifurcation_diagram(v0,v1,frequency,phases):
     _, (ax1,ax2,ax3,ax4) = plt.subplots(4, 1, sharex='all')

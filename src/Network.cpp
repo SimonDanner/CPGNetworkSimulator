@@ -135,6 +135,8 @@ void Network::initialize(int N_NP, int N_normal){
     
     
     transV = myvec(N_Neurons);
+    Iepsp = myvec(N_Neurons);
+    Iipsp = myvec(N_Neurons);
     //randomGen = OrnsteinUhlenbeck(N_NP+N_normal,0.0,1.0,5.0);
 }
 
@@ -815,7 +817,7 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
 
 inline double sech(double z){return 2/(exp(z)+exp(-z));};
 //inline double pos(double d){return d>0.0?d:0.0;};
-inline double pos(double d){return std::signbit(d)?0.0:d;};
+
 
 //integration step
 void Network::step(const myvec &x, myvec &dxdt, double t){
@@ -841,10 +843,12 @@ void Network::step(const myvec &x, myvec &dxdt, double t){
     for (int i = 0;i<N_Neurons;++i){
         dxdt[i]=(-gBarLeak[i]*(x[i]-ELeak[i]));
         for (auto it=connE(i).begin();it!=connE(i).end();++it){
-            dxdt[i]-=pos(*it->weight)*transV(it->from)*(x[i]-ESynE[i]);
+            Iepsp[i]=pos(*it->weight)*transV(it->from)*(x[i]-ESynE[i]);
+            dxdt[i]-=Iepsp[i];
         }
         for (auto it=connI(i).begin();it!=connI(i).end();++it){
-            dxdt[i]-=pos(*it->weight)*transV(it->from)*(x[i]-ESynI[i]);
+            Iipsp[i]=pos(*it->weight)*transV(it->from)*(x[i]-ESynI[i]);
+            dxdt[i]-=Iipsp[i];
         }
         dxdt[i]+=-(randV[i]*sigmaNoise[i]);
         dxdt[i]/=Cmem[i];

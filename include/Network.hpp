@@ -71,6 +71,8 @@ const double c_tauNoise = 10.0;
 
 //const double settingPeriod = 10000.0; //ms
 
+inline double pos(double d){return std::signbit(d)?0.0:d;};
+
 struct connection{
     int from;
     double *weight; //offset
@@ -183,6 +185,8 @@ public:
     std::list<feedback_body_tilt> feedbackBodyTilt;
     
     myvec transV;
+    myvec Iepsp;
+    myvec Iipsp;
     
     OrnsteinUhlenbeck randomGen;
     

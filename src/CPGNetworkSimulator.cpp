@@ -29,6 +29,7 @@ CPGNetworkSimulator::CPGNetworkSimulator(const std::string filename,const std::v
 
 void CPGNetworkSimulator::initialize(){
     state=net->genInitialCond();
+    dense_stepper.initialize( state , 0.0 , 0.001 );
     integrate_const( controlled_stepper, sys, state , 0.0 , 10., 0.002);
     for(int i = 0;i<net->in_Act.size();++i){
         std::vector<double> v_;
@@ -63,10 +64,32 @@ void CPGNetworkSimulator::controlled_step(double dt_){
     
     t0+=dt;
 }
+void CPGNetworkSimulator::dense_step(double dt_){
+    dt=dt_;
+    while ( t_last_dense < t0+dt){
+        auto t = dense_stepper.do_step(sys);
+        t_last_dense = t.second;
+    }
+    dense_stepper.calc_state( t0+dt , state );
+
+    for(int i = 0;i<net->in_Act.size();++i){
+        for(int j = 0;j<net->in_Act[0].size();++j){
+            int index = net->in_Act[i][j];
+            act[i][j] = std::min(1.0,pos(state[index]-net->Vmin[index])/(net->Vmax[index]-net->Vmin[index]));
+        }
+    }
+    
+    t0+=dt;
+}
 
 bool CPGNetworkSimulator::updateVariable(const std::string var, double value){
     return net->updateVariable(var,value);
 }
+
+double CPGNetworkSimulator::getVariableValue(const std::string var){
+    return net->getVariableValue(var);
+}
+
 
 std::vector<double> CPGNetworkSimulator::setupVariableVector(const std::vector<std::string> variablenames){
     variableVectorNames = variablenames;

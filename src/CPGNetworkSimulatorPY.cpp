@@ -35,16 +35,22 @@ PYBIND11_PLUGIN(_CPGNetworkSimulator) {
         .def(py::init<const std::string, const std::vector<std::string>, const std::vector<std::vector<std::string>>>())
         .def("step", &CPGNetworkSimulator::step)
         .def("controlled_step", &CPGNetworkSimulator::controlled_step)
+        .def("dense_step", &CPGNetworkSimulator::dense_step)
         .def("getAct", &CPGNetworkSimulator::getAct)
         .def("setAlpha", &CPGNetworkSimulator::setAlpha)
         .def("updateVariable", &CPGNetworkSimulator::updateVariable)
+        .def("getVariableValue",&CPGNetworkSimulator::getVariableValue)
         .def("setBodyTilt",&CPGNetworkSimulator::setBodyTilt)
         .def("setupVariableVector",&CPGNetworkSimulator::setupVariableVector)
         .def("updateVariableVector",&CPGNetworkSimulator::updateVariableVector)
         .def("updateParameter",&CPGNetworkSimulator::updateParameter)
         .def("setLscond", &CPGNetworkSimulator::setLscond)
         .def("getState", &CPGNetworkSimulator::getState)
-        .def("setState", &CPGNetworkSimulator::setState);
+        .def("setState", &CPGNetworkSimulator::setState)
+        .def("getEleak", &CPGNetworkSimulator::getEleak)
+        .def("setEleak", &CPGNetworkSimulator::setEleak)
+        .def("getIepsp", &CPGNetworkSimulator::getEleak)
+        .def("getIipsp", &CPGNetworkSimulator::getEleak);
     return m.ptr();
 }
 

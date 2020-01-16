@@ -17,8 +17,8 @@ For gait-frequency / phase-frequency plots under application of noise use index 
 
 2D bifurcation diagrams and noise-simulations support parallelization through scoop.
 """
-import tools.py_simulator as nsim
-from tools.plt import plot_1d_bifurcation_diagram, plot_2d_bifurcation_diagram, plot_noise_phase_fq, plot_noise_gait_fq
+import CPGNetworkSimulator.tools.py_simulator as nsim
+from CPGNetworkSimulator.tools.plt import plot_1d_bifurcation_diagram, plot_2d_bifurcation_diagram, plot_noise_phase_fq, plot_noise_gait_fq
 from optparse import OptionParser
 import matplotlib.pyplot as plt
 
@@ -44,12 +44,14 @@ if __name__ == "__main__":
         v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
             'd0_CnF_Glu_L', [3.95, 5.3675], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
+        plt.show()
 
     elif options.sim == 1:
         """Bifurcation diagram unilateral stimulation of glutaminergic neurons in PPN"""
         v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
             'd0_PPN_Glu', [4.0, 5.5], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
+        plt.show()
 
     elif options.sim == 2:
         """Bifurcation diagram unilateral stimulation of glutaminergic neurons in CNF
@@ -62,18 +64,21 @@ if __name__ == "__main__":
         v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
             'd0_CnF_Glu_L', [4.2, 6.8775], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
+        plt.show()
 
     elif options.sim == 3:
         """Bifurcation diagram unlilateral stimulation of LPGi"""
         v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
             'd0_LPGi_Glu', [2.45, 2.45+1.1], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
+        plt.show()
 
     elif options.sim == 10:
         """2D bifurcation diagram stimulation of unilateral CnF GAT vs bilateral CnF Glu"""
         v0, v1, fq, ph, gaits = cpg_sim.do_2d_bifurcation(
             ('d0_CnF_GAT', 'd0_CnF_Glu_bl'), ([1.1, 3.0], [2.78, 3.1]), steps_2D)
         plot_2d_bifurcation_diagram(v0, v1, fq, ph)
+        plt.show()
         
 
     elif options.sim == 11:
@@ -81,12 +86,14 @@ if __name__ == "__main__":
         v0, v1, fq, ph, gaits = cpg_sim.do_2d_bifurcation(
             ('d0_PPN_GAT', 'd0_CnF_Glu_bl'), ([1.1, 3.0], [2.78, 3.1]), steps_2D)
         plot_2d_bifurcation_diagram(v0, v1, fq, ph)
+        plt.show()
         
     elif options.sim == 12:
         """2D bifurcation diagram stimulation of unilateral LPGi GAT vs bilateral CnF Glu"""
         v0, v1, fq, ph, gaits = cpg_sim.do_2d_bifurcation(
             ('d0_LPGi_GAT', 'd0_CnF_Glu_bl'), ([1.1, 3.0], [2.78, 3.1]), steps_2D)
         plot_2d_bifurcation_diagram(v0, v1, fq, ph)
+        plt.show()
 
     elif options.sim == 20:
         """Calculate frequency vs gait/phase difference plots """
