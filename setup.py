@@ -45,7 +45,7 @@ def cpp_flag(compiler):
 MAJOR_VERSION=1
 MINOR_VERSION=0
 print(str(MAJOR_VERSION) + '.' + str(MINOR_VERSION))
-module1 = Extension('_CPGNetworkSimulator',
+module1 = Extension('CPGNetworkSimulator._CPGNetworkSimulator',
                     extra_compile_args=["-std=c++14", "-Ofast", "-march=native"],
                     define_macros = [('MAJOR_VERSION', str(MAJOR_VERSION)),
                                      ('MINOR_VERSION', str(MINOR_VERSION))],

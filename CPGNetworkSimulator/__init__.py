@@ -1,1 +1,2 @@
-from _CPGNetworkSimulator import *
+#from _CPGNetworkSimulator import *
+from CPGNetworkSimulator.tools import *

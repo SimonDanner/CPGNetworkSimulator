@@ -21,8 +21,8 @@
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(_CPGNetworkSimulator) {
-    py::module m("_CPGNetworkSimulator", "Network Simulator");
+PYBIND11_MODULE(_CPGNetworkSimulator,m) {
+    m.doc() = ("Network Simulator");
     py::class_<LimbSensorCondition>(m, "LimbSensorCondition")
         .def(py::init<>())
         .def(py::init<int>())
@@ -51,6 +51,5 @@ PYBIND11_PLUGIN(_CPGNetworkSimulator) {
         .def("setEleak", &CPGNetworkSimulator::setEleak)
         .def("getIepsp", &CPGNetworkSimulator::getIepsp)
         .def("getIipsp", &CPGNetworkSimulator::getIipsp);
-    return m.ptr();
 }
 

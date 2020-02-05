@@ -25,8 +25,7 @@ class simulator:
 
     def initialize_simulator(self):
         if not self.initialized:
-            fn = os.path.join(os.path.dirname(__file__),"../..",self.filename)
-            self.sim = nsim.CPGNetworkSimulator(fn,["a","b"],(self.neurons,))
+            self.sim = nsim.CPGNetworkSimulator(self.filename,["a","b"],(self.neurons,))
             self.sim.setAlpha(self.alphainit)
             self.setDuration(self.duration)
             self.initialized=True
