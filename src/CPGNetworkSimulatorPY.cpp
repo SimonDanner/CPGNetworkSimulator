@@ -21,7 +21,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(_CPGNetworkSimulator,m) {
+PYBIND11_MODULE(CPGNetworkSimulator,m) {
     m.doc() = ("Network Simulator");
     py::class_<LimbSensorCondition>(m, "LimbSensorCondition")
         .def(py::init<>())
