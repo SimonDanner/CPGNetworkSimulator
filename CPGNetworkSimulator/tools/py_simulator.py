@@ -52,7 +52,7 @@ class simulator:
     def run_sim(self):
         out = np.zeros((len(self.time_vec),len(self.neurons)))
         for ind_t,t in enumerate(self.time_vec):
-            self.sim.dense_step(self.dt)
+            self.sim.step(self.dt)
             act = self.sim.getAct()
             out[ind_t,:]=act[0]
         return out
@@ -191,7 +191,7 @@ class simulator:
                 mfq = 1.0/np.nanmean(phase_dur[-5:])
             its+=1
         gaits = self.classify_gait_simple((ex_phase_dur/phase_dur)[-5:],phases[-5:,:])
-        return (mfq, mphases_, gaits[-1:])
+        return (mfq, mphases_, gaits[-1])
 
     def do_1d_bifurcation(self,variable_name,range_,steps,updown=True):
         self.initialize_simulator()
@@ -211,11 +211,11 @@ class simulator:
             self.updateVariable(variable_name,v[j])
 
             fq, phases_, gait_ = self.do_iteration()
-            
+            #import IPython;IPython.embed()
             if not np.isnan(fq):
                 frequency[j,0]=fq
-                #if isinstance( gait_ , float):
-                gait[j,0]=gait_
+                if isinstance( gait_ , float):
+                    gait[j,0]=gait_
                 phases[j,:,0]=phases_
             j_start_back=j-1
             if np.isnan(fq) and not go_up_on_nan:

@@ -20,8 +20,8 @@ import numpy as np
 if __name__ == "__main__":
     neurons = ["RGF_NaP_L_hind", "RGF_NaP_R_hind",      # neurons to be read every time step 
                "RGF_NaP_L_front", "RGF_NaP_R_front"]
-    filename = "./models/4CPG9MN_2019_V3.txt" #  network model configuration file 
-
+    filename = "./models/4CPG_2019_V3.txt" #  network model configuration file 
+    #filename = "./models/eLife-V3.txt"
     steps_1D = 100       #number of steps for 1D-bifurcation diagrams
     steps_2D = (50,20) 
 
@@ -33,6 +33,7 @@ if __name__ == "__main__":
 
     if options.sim == 0:
         cpg_sim.initialize_simulator()
+        cpg_sim.its_limit=1
         #cpg_sim.sim.updateVariable(vs[0][0],  vs[0][1])
         #cpg_sim.sim.updateVariable(vs[1][0],  vs[1][1])
         v, fq, ph, gait = cpg_sim.do_1d_bifurcation('alpha', [0.00, 1.05], steps_1D)
