@@ -4,3 +4,4 @@
 from CPGNetworkSimulator.tools import *
 #import CPGNetworkSimulator 
 from .CPGNetworkSimulator import CPGNetworkSimulator
+from .CPGNetworkSimulator import *
