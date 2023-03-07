@@ -30,7 +30,7 @@ CPGNetworkSimulator::CPGNetworkSimulator(const std::string filename,const std::v
 void CPGNetworkSimulator::initialize(){
     state=net->genInitialCond();
     dense_stepper.initialize( state , 0.0 , 0.001 );
-    integrate_const( controlled_stepper, sys, state , 0.0 , 10., 0.002);
+    integrate_const( stepper, sys, state , 0.0 , 10., 0.002);
     for(int i = 0;i<net->in_Act.size();++i){
         std::vector<double> v_;
         std::vector<double> ie_;

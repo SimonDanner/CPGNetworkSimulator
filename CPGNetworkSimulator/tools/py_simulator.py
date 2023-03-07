@@ -16,6 +16,7 @@ class simulator:
     def __init__(self,**kwargs):
         self.neurons = kwargs.get('neurons', ["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"])
         self.filename = kwargs.get('filename', "./models/MLR_45.txt")
+        self.musclenames = kwargs.get('musclenames',["a","b"])
         self.dt = kwargs.get('dt',0.001)
         self.duration = kwargs.get('duration',10.0)
         self.phase_diffs = kwargs.get('phase_diffs',[(0,1),(2,3),(0,2),(0,3),(1,3),(1,2)])
@@ -25,7 +26,7 @@ class simulator:
 
     def initialize_simulator(self):
         if not self.initialized:
-            self.sim = nsim.CPGNetworkSimulator(self.filename,["a","b"],(self.neurons,))
+            self.sim = nsim.CPGNetworkSimulator(self.filename,self.musclenames,(self.neurons,))
             self.sim.setAlpha(self.alphainit)
             self.setDuration(self.duration)
             self.initialized=True
@@ -74,8 +75,8 @@ class simulator:
 
     @staticmethod
     def calc_on_offsets(time_vec,out):
-        os_=((np.diff((out>0.1).astype(np.int),axis=0)==1).T)
-        of_=((np.diff((out>0.1).astype(np.int),axis=0)==-1).T)
+        os_=((np.diff((out>0.1).astype(np.int64),axis=0)==1).T)
+        of_=((np.diff((out>0.1).astype(np.int64),axis=0)==-1).T)
         onsets=npml.repmat(time_vec[:-1],out.shape[1],1)[os_]
         offsets=npml.repmat(time_vec[:-1],out.shape[1],1)[of_]
         leg_os=(npml.repmat(np.arange(out.shape[1]),len(time_vec)-1,1).T)[os_]

@@ -503,22 +503,32 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
                         to = it->first;
                     }
                 }
-                if(isValid<double>(strs[5])){
-                    weight = new double;
-                    *weight = std::stod(strs[5],&sz);
-                }else if(variableMap.find(strs[5])!=variableMap.end()){
-                    auto it = variableMap.find(strs[5]);
-                    weight = it->second;
+                if(strs.size()>=6){
+                    if(isValid<double>(strs[5])){
+                        weight = new double;
+                        *weight = std::stod(strs[5],&sz);
+                    }else if(variableMap.find(strs[5])!=variableMap.end()){
+                        auto it = variableMap.find(strs[5]);
+                        weight = it->second;
+                    }
+                }else{
+                    weight = new double(0.0);
+                    std::cout << "#####+++++=====##### at line " << line << " weight was not read -> was set to 0" << std::endl;
                 }
-                if(isValid<double>(strs[7])){
-                    slope = new double;
-                    *slope = std::stod(strs[7],&sz);
-                }else if(variableMap.find(strs[7])!=variableMap.end()){
-                    auto it = variableMap.find(strs[7]);
-                    slope = it->second;
+                if(strs.size()>=8){
+                    if(isValid<double>(strs[7])){
+                        slope = new double;
+                        *slope = std::stod(strs[7],&sz);
+                    }else if(variableMap.find(strs[7])!=variableMap.end()){
+                        auto it = variableMap.find(strs[7]);
+                        slope = it->second;
+                    }
+                }else{
+                    slope = new double(0.0);
+                    //std::cout << "#####+++++=====##### at line " << line << " slope was not read -> was set to 0" << std::endl;
                 }
                 if(from==-1||to==-1){
-                    std::cout << "at line " << line << " neuron names were not recognized" << std::endl;
+                    std::cout << "#####+++++=====##### at line " << line << " neuron names were not recognized" << std::endl;
                 }else{
                     if (strs[0]=="connectionE"){
                         setConnE(from,to,weight,slope);
@@ -537,126 +547,147 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
                 double *weight = nullptr;
                 double *offset = nullptr;
                 int to=-1;
-                for (auto it=names.begin(); it!=names.end(); ++it){
-                    if(it->second==strs[7]){
-                        to = it->first;
+                if(strs.size()>=8){
+                    for (auto it=names.begin(); it!=names.end(); ++it){
+                        if(it->second==strs[7]){
+                            to = it->first;
+                        }
                     }
-                }
-                if(isValid<double>(strs[1])){
-                    weight = new double;
-                    *weight = std::stod(strs[1],&sz);
-                }else if(variableMap.find(strs[1])!=variableMap.end()){
-                    auto it = variableMap.find(strs[1]);
-                    weight = it->second;
-                }
-                if(isValid<double>(strs[5])){
-                    offset = new double;
-                    *offset = std::stod(strs[5],&sz);
-                }else if(variableMap.find(strs[5])!=variableMap.end()){
-                    auto it = variableMap.find(strs[5]);
-                    offset = it->second;
-                }
-                if(strs[0]=="driveE"){
-                    setDriveE(to, weight, offset);
-                    std::cout << "adding excitatory drive to " << to << strs[7] << " weight " << *weight << " offset " << *offset << std::endl;
-                }else if (strs[0]=="driveI"){
-                    setDriveI(to, weight, offset);
-                    std::cout << "adding inhibitory drive to " << to << strs[7] << " weight " << *weight << " offset " << *offset << std::endl;
+                    
+                    if(isValid<double>(strs[1])){
+                        weight = new double;
+                        *weight = std::stod(strs[1],&sz);
+                    }else if(variableMap.find(strs[1])!=variableMap.end()){
+                        auto it = variableMap.find(strs[1]);
+                        weight = it->second;
+                    }
+                    if(isValid<double>(strs[5])){
+                        offset = new double;
+                        *offset = std::stod(strs[5],&sz);
+                    }else if(variableMap.find(strs[5])!=variableMap.end()){
+                        auto it = variableMap.find(strs[5]);
+                        offset = it->second;
+                    }
+                    if(to==-1){
+                        std::cout << "#####+++++=====##### at line " << line << " neuron name was not recognized" << std::endl;
+                    }else if(strs[0]=="driveE"){
+                        setDriveE(to, weight, offset);
+                        std::cout << "adding excitatory drive to " << to << strs[7] << " weight " << *weight << " offset " << *offset << std::endl;
+                    }else if (strs[0]=="driveI"){
+                        setDriveI(to, weight, offset);
+                        std::cout << "adding inhibitory drive to " << to << strs[7] << " weight " << *weight << " offset " << *offset << std::endl;
+                    }
+                }else{
+                    std::cout << "#####+++++=====##### at line " << line << " drive not defined appropriately - will be ignored" << std::endl;
                 }
             }else if (strs[0]=="feedbackIa"||strs[0]=="feedbackIb"||strs[0]=="feedbackII"||strs[0]=="feedbackCutaneous"){
                 double* weight;
-                if(isValid<double>(strs[6])){
-                    weight = new double;
-                    *weight = std::stod(strs[6],&sz);
-                }else if(variableMap.find(strs[6])!=variableMap.end()){
-                    auto it = variableMap.find(strs[6]);
-                    weight = it->second;
-                }
-                int to=-1;
-                int fromleg=-1;
-                int frommg=-1;
-                for (auto it=names.begin(); it!=names.end(); ++it){
-                    if(it->second==strs[4]){
-                        to = it->first;
+                if(strs.size()>=7){
+                    if(isValid<double>(strs[6])){
+                        weight = new double;
+                        *weight = std::stod(strs[6],&sz);
+                    }else if(variableMap.find(strs[6])!=variableMap.end()){
+                        auto it = variableMap.find(strs[6]);
+                        weight = it->second;
                     }
-                }
-                if(strs[1]=="L_hind"){
-                    fromleg=0;
-                }
-                if(strs[1]=="R_hind"){
-                    fromleg=1;
-                }
-                if(strs[1]=="L_front"){
-                    fromleg=2;
-                }
-                if(strs[1]=="R_front"){
-                    fromleg=3;
-                }
-                for(std::size_t m_in=0;m_in<musclenames.size();++m_in){
-                    if(strs[2]==musclenames[m_in]){
-                        frommg=static_cast<int>(m_in);
+                    int to=-1;
+                    int fromleg=-1;
+                    int frommg=-1;
+                    for (auto it=names.begin(); it!=names.end(); ++it){
+                        if(it->second==strs[4]){
+                            to = it->first;
+                        }
                     }
-                }
-                
-                if(strs[0]=="feedbackIa"){
-                    setFeedbackIa(to, fromleg, frommg, weight);
-                    std::cout << "adding feedbackIa from "<< fromleg << strs[1] << " " << strs[2] << frommg << " to " << to << strs[3] << " weight " << *weight << std::endl;
-                }else if(strs[0]=="feedbackIb"){
-                    setFeedbackIb(to, fromleg,frommg, weight);
-                    std::cout << "adding feedbackIb from "<< fromleg << strs[1] << " " << strs[2] << frommg << " to " << to << strs[3] << " weight " << *weight << std::endl;
-                }else if(strs[0]=="feedbackII"){
-                    setFeedbackII(to, fromleg,frommg, weight);
-                    std::cout << "adding feedbackII from "<< fromleg << strs[1] << " " << strs[2] << frommg << " to " << to << strs[3] << " weight " << *weight << std::endl;
-                }else if(strs[0]=="feedbackCutaneous"){
-                    setFeedbackCutaneous(to, fromleg, weight);
-                    std::cout << "adding feedbackCutaneous from "<< fromleg << strs[1] << " to " << to << strs[3] << " weight " << *weight << std::endl;
-                }
-            }else if (strs[0]=="feedbackBodyTilt") {
-                feedback_body_tilt bt;
-                
-                if(isValid<double>(strs[6])){
-                    bt.weight = new double;
-                    *(bt.weight) = std::stod(strs[6],&sz);
-                }else if(variableMap.find(strs[6])!=variableMap.end()){
-                    auto it = variableMap.find(strs[6]);
-                    bt.weight = it->second;
-                }
-                if(strs.size()>8){
-                    if(isValid<double>(strs[8])){
-                        bt.cutoff = new double;
-                        *(bt.cutoff) = std::stod(strs[8],&sz);
-                    }else if(variableMap.find(strs[8])!=variableMap.end()){
-                        auto it = variableMap.find(strs[8]);
-                        bt.cutoff = it->second;
+                    if(strs[1]=="L_hind"){
+                        fromleg=0;
+                    }
+                    if(strs[1]=="R_hind"){
+                        fromleg=1;
+                    }
+                    if(strs[1]=="L_front"){
+                        fromleg=2;
+                    }
+                    if(strs[1]=="R_front"){
+                        fromleg=3;
+                    }
+                    for(std::size_t m_in=0;m_in<musclenames.size();++m_in){
+                        if(strs[2]==musclenames[m_in]){
+                            frommg=static_cast<int>(m_in);
+                        }
+                    }
+                    if(to==-1||fromleg==-1){
+                        std::cout << "#####+++++=====##### at line " << line << " neuron or leg was not recognized -> ignoreing connection" << std::endl;
+                    }else{
+                        if(frommg==-1&&strs[0]!="feedbackCutaneous"){
+                            std::cout << "#####+++++=====##### at line " << line << " muscle group was not recognized -> ignoreing connection" << std::endl;
+                        }else if(strs[0]=="feedbackIa"){
+                            setFeedbackIa(to, fromleg, frommg, weight);
+                            std::cout << "adding feedbackIa from "<< fromleg << strs[1] << " " << strs[2] << frommg << " to " << to << strs[3] << " weight " << *weight << std::endl;
+                        }else if(strs[0]=="feedbackIb"){
+                            setFeedbackIb(to, fromleg,frommg, weight);
+                            std::cout << "adding feedbackIb from "<< fromleg << strs[1] << " " << strs[2] << frommg << " to " << to << strs[3] << " weight " << *weight << std::endl;
+                        }else if(strs[0]=="feedbackII"){
+                            setFeedbackII(to, fromleg,frommg, weight);
+                            std::cout << "adding feedbackII from "<< fromleg << strs[1] << " " << strs[2] << frommg << " to " << to << strs[3] << " weight " << *weight << std::endl;
+                        } 
+                        if(strs[0]=="feedbackCutaneous"){
+                            setFeedbackCutaneous(to, fromleg, weight);
+                            std::cout << "adding feedbackCutaneous from "<< fromleg << strs[1] << " to " << to << strs[3] << " weight " << *weight << std::endl;
+                        }
                     }
                 }else{
-                    bt.cutoff = new double(0.0);
+                    std::cout << "#####+++++=====##### at line " << line << " feedback not defined appropriately - will be ignored" << std::endl;
                 }
-                for (auto it=names.begin(); it!=names.end(); ++it){
-                    if(it->second==strs[4]){
-                        bt.to = it->first;
+            }else if (strs[0]=="feedbackBodyTilt") {
+                if(strs.size()>=9){
+                    feedback_body_tilt bt;
+                    
+                    if(isValid<double>(strs[6])){
+                        bt.weight = new double;
+                        *(bt.weight) = std::stod(strs[6],&sz);
+                    }else if(variableMap.find(strs[6])!=variableMap.end()){
+                        auto it = variableMap.find(strs[6]);
+                        bt.weight = it->second;
                     }
+                    if(strs.size()>8){
+                        if(isValid<double>(strs[8])){
+                            bt.cutoff = new double;
+                            *(bt.cutoff) = std::stod(strs[8],&sz);
+                        }else if(variableMap.find(strs[8])!=variableMap.end()){
+                            auto it = variableMap.find(strs[8]);
+                            bt.cutoff = it->second;
+                        }
+                    }else{
+                        bt.cutoff = new double(0.0);
+                    }
+                    for (auto it=names.begin(); it!=names.end(); ++it){
+                        if(it->second==strs[4]){
+                            bt.to = it->first;
+                        }
+                    }
+                    if(strs[1]=="ANTERIOR"){
+                        bt.direction=0;
+                    }
+                    if(strs[1]=="POSTERIOR"){
+                        bt.direction=1;
+                    }
+                    if(strs[1]=="LEFT"){
+                        bt.direction=2;
+                    }
+                    if(strs[1]=="RIGHT"){
+                        bt.direction=3;
+                    }
+                    if(strs[2]=="ANGLE"){
+                        bt.type=0;
+                    }
+                    if(strs[2]=="VELOCITY"){
+                        bt.type=1;
+                    }
+                    feedbackBodyTilt.push_back(bt);
+                    std::cout << "adding feedbackBodyTilt " <<  strs[1] << bt.direction << " " << strs[2] << bt.type << " to " << strs[4] << bt.to << " with weight " << *bt.weight << " cutoff " << *bt.cutoff << std::endl;
+                }else{
+                    std::cout << "#####+++++=====##### at line " << line << " feedback not defined appropriately - will be ignored" << std::endl;
                 }
-                if(strs[1]=="ANTERIOR"){
-                    bt.direction=0;
-                }
-                if(strs[1]=="POSTERIOR"){
-                    bt.direction=1;
-                }
-                if(strs[1]=="LEFT"){
-                    bt.direction=2;
-                }
-                if(strs[1]=="RIGHT"){
-                    bt.direction=3;
-                }
-                if(strs[2]=="ANGLE"){
-                    bt.type=0;
-                }
-                if(strs[2]=="VELOCITY"){
-                    bt.type=1;
-                }
-                feedbackBodyTilt.push_back(bt);
-                std::cout << "adding feedbackBodyTilt " <<  strs[1] << bt.direction << " " << strs[2] << bt.type << " to " << strs[4] << bt.to << " with weight " << *bt.weight << " cutoff " << *bt.cutoff << std::endl;
             }else if (strs[0]=="simDuration") {
                 simDuration=std::stod(strs[1],&sz);
                 std::cout << "setting simDuration to " << simDuration << std::endl;
