@@ -493,8 +493,8 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
             }else if (strs[0]=="connectionE"||strs[0]=="connectionI"||strs[0]=="connectionC"){
                 int from = -1;
                 int to = -1;
-                double* weight;
-                double* slope;
+                double* weight = nullptr;
+                double* slope  = nullptr;
                 for (auto it=names.begin(); it!=names.end(); ++it){
                     if(it->second==strs[1]){
                         from = it->first;
@@ -581,7 +581,7 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
                     std::cout << "#####+++++=====##### at line " << line << " drive not defined appropriately - will be ignored" << std::endl;
                 }
             }else if (strs[0]=="feedbackIa"||strs[0]=="feedbackIb"||strs[0]=="feedbackII"||strs[0]=="feedbackCutaneous"){
-                double* weight;
+                double* weight = nullptr;
                 if(strs.size()>=7){
                     if(isValid<double>(strs[6])){
                         weight = new double;
@@ -1002,7 +1002,7 @@ bool Network::updateVariable(const std::string name,const double value){
     for(auto it = variableMap.begin();it!=variableMap.end();++it){
         if(name==it->first){
             (*it->second)=value;
-            std::cout << "set variable " << name << " to " << value << std::endl;
+            //std::cout << "set variable " << name << " to " << value << std::endl;
             return true;
         }
     }

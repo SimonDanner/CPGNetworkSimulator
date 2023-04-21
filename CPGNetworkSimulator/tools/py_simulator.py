@@ -23,6 +23,14 @@ class simulator:
         self.phase_diff_names = kwargs.get('phase_diff_names',['L-R hind','L-R fore','homolateral','diagonal','homolateral','diagonal'])
         self.alphainit = 0.0
         self.doPreRun = True
+        self.variables = {}
+        with open( self.filename) as fp:
+            for line in fp:
+                ln = line.split()
+                if len(ln) > 0:
+                    if 'variable' in ln[0]:
+                        if ln[1] not in self.variables.keys():
+                            self.variables[ln[1]] = float(ln[2])
 
     def initialize_simulator(self):
         if not self.initialized:
@@ -35,6 +43,12 @@ class simulator:
                 for i in range(10):
                     self.run_sim()
                 self.IC = self.sim.getState()
+            self.v0 = self.sim.setupVariableVector([k for k in self.variables.keys()])
+        
+    def reset(self):
+        if self.initialized:
+            self.sim.updateVariableVector(self.v0)
+            self.sim.setState(self.IC)
             
     def updateVariable(self,name,value):
         if(name=="alpha"):

@@ -42,9 +42,9 @@ def plot_1d_bifurcation_diagram(v,fq,ph,gait,fqmax=12.0):
 def plot_2d_bifurcation_diagram(v0,v1,frequency,phases):
     _, (ax1,ax2,ax3,ax4) = plt.subplots(4, 1, sharex='all')
     ax1.pcolor(v1,v0,frequency[:,:,0])
-    ax2.pcolor(v1,v0,phases[:,:,0,0])
-    ax3.pcolor(v1,v0,phases[:,:,2,0])
-    ax4.pcolor(v1,v0,phases[:,:,3,0])
+    ax2.pcolor(v1,v0,phases[:,:,0,0],vmin=0,vmax=1)
+    ax3.pcolor(v1,v0,phases[:,:,2,0],vmin=0,vmax=1)
+    ax4.pcolor(v1,v0,phases[:,:,3,0],vmin=0,vmax=1)
     plt.show()
 
 def plot_noise_phase_fq(fqs,phases):
