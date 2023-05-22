@@ -443,9 +443,9 @@ Network::Network(std::string filename,std::vector<std::string> musclenames, std:
             return;
         }
         initialize(NNaP,NNorm);
-        lscond=std::vector<LimbSensorCondition>(2);
+        lscond=std::vector<LimbSensorCondition>(4);
         for(int i = 0;i<musclenames.size();i++){
-            for(int k = 0;k<2;k++){
+            for(int k = 0;k<4;k++){
                 lscond[k].Ia.push_back(0.0);
                 lscond[k].Ib.push_back(0.0);
                 lscond[k].II.push_back(0.0);
