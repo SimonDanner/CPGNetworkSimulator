@@ -50,6 +50,7 @@ PYBIND11_MODULE(CPGNetworkSimulator,m) {
         .def("getEleak", &CPGNetworkSimulator::getEleak)
         .def("setEleak", &CPGNetworkSimulator::setEleak)
         .def("getIepsp", &CPGNetworkSimulator::getIepsp)
-        .def("getIipsp", &CPGNetworkSimulator::getIipsp);
+        .def("getIipsp", &CPGNetworkSimulator::getIipsp)
+        .def("getNeuronNames", &CPGNetworkSimulator::getNeuronNames);
 }
 

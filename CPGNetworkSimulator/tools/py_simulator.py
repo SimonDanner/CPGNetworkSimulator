@@ -35,6 +35,8 @@ class simulator:
     def initialize_simulator(self):
         if not self.initialized:
             self.sim = nsim.CPGNetworkSimulator(self.filename,self.musclenames,(self.neurons,))
+            nn = self.sim.getNeuronNames()
+            self.neuron_indices = {v:k for k,v in nn.items()}
             self.sim.setAlpha(self.alphainit)
             self.setDuration(self.duration)
             self.initialized=True

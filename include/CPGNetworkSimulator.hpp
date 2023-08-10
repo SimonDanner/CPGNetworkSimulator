@@ -96,6 +96,7 @@ public:
     void setEleak(std::vector<double> el){
         net->ELeak = myvec(el);
     }
+    std::map<int,std::string> getNeuronNames(){return net->names;};
 };
 
 #endif /* Solver_hpp */
