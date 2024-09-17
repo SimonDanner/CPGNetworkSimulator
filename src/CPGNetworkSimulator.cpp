@@ -60,6 +60,38 @@ void CPGNetworkSimulator::step(double dt_){
     
     t0+=dt;
 }
+
+void CPGNetworkSimulator::step(double dt_,double error){
+    dt=dt_;
+    myvec xerr = myvec(state.size());
+    double maxerr = 0.0;
+    for (int i = 0;i<N_substeps;++i){
+        double dt_sub = dt/double(N_substeps);
+        stepper.do_step(sys,state,t0,dt_sub,xerr);
+        for(int i = 0;i<xerr.size();++i){
+            maxerr = std::max<double>(maxerr,std::abs(xerr[i]));
+        }
+        t0+=dt_sub;
+    }
+    if(maxerr>error){
+        N_substeps*=2;
+    }else if(maxerr<error/2.0){
+        if(N_substeps>1){
+            N_substeps/=2;
+        }
+    }
+    
+
+    for(int i = 0;i<net->in_Act.size();++i){
+        for(int j = 0;j<net->in_Act[0].size();++j){
+            act[i][j] = net->transV[net->in_Act[i][j]];
+            Iepsp[i][j] = net->Iepsp[net->in_Act[i][j]];
+            Iipsp[i][j] = net->Iipsp[net->in_Act[i][j]];
+        }
+    }
+    
+}
+
 void CPGNetworkSimulator::controlled_step(double dt_){
     dt=dt_;
     integrate_const( controlled_stepper , sys , state , t0 , t0+dt , dt );

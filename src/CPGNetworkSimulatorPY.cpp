@@ -33,7 +33,8 @@ PYBIND11_MODULE(CPGNetworkSimulator,m) {
 
     py::class_<CPGNetworkSimulator>(m, "CPGNetworkSimulator")
         .def(py::init<const std::string, const std::vector<std::string>, const std::vector<std::vector<std::string>>>())
-        .def("step", &CPGNetworkSimulator::step)
+        .def("step", py::overload_cast<double>(&CPGNetworkSimulator::step))
+        .def("step", py::overload_cast<double,double>(&CPGNetworkSimulator::step))
         .def("controlled_step", &CPGNetworkSimulator::controlled_step)
         .def("dense_step", &CPGNetworkSimulator::dense_step)
         .def("getAct", &CPGNetworkSimulator::getAct)

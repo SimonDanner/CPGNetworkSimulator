@@ -1,10 +1,7 @@
 import CPGNetworkSimulator as nsim
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import numpy.matlib as npml
 from scipy.stats import circstd, circmean
-import os
 from scoop import futures
 
 import functools
@@ -24,6 +21,7 @@ class simulator:
         self.alphainit = 0.0
         self.doPreRun = True
         self.variables = {}
+        self.total_iterations = 0
         with open( self.filename) as fp:
             for line in fp:
                 ln = line.split()
@@ -207,6 +205,8 @@ class simulator:
                 max_std_phases = np.max(circstd(phases[-5:,:],1.0,0.0,0))
                 mfq = 1.0/np.nanmean(phase_dur[-5:])
             its+=1
+            self.total_iterations += 1
+            
         gaits = self.classify_gait_simple((ex_phase_dur/phase_dur)[-5:],phases[-5:,:])
         return (mfq, mphases_, gaits[-1])
 
@@ -220,6 +220,7 @@ class simulator:
         IChist=list()
         j_start_back=0
         go_up_on_nan=True
+        self.total_iterations = 0
         #self.sim.setState(IC)
 
         self.updateVariable(variable_name,v[0])
@@ -252,7 +253,7 @@ class simulator:
                     if isinstance( gait_ , float):
                         gait[j,1]=gait_
                     phases[j,:,1]=phases_
-                
+        print('total sim time',self.total_iterations * self.duration)
         return (v,frequency,phases,gait)
 
     def do_1d_bifurcation_helper(self,at_value,bi_variable_name,bi_range,bi_steps,at_variable_name,updown=True):
