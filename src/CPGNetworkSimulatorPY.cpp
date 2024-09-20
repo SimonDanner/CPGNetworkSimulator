@@ -21,8 +21,8 @@
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(_CPGNetworkSimulator) {
-    py::module m("_CPGNetworkSimulator", "Network Simulator");
+PYBIND11_MODULE(CPGNetworkSimulator,m) {
+    m.doc() = ("Network Simulator");
     py::class_<LimbSensorCondition>(m, "LimbSensorCondition")
         .def(py::init<>())
         .def(py::init<int>())
@@ -33,18 +33,25 @@ PYBIND11_PLUGIN(_CPGNetworkSimulator) {
 
     py::class_<CPGNetworkSimulator>(m, "CPGNetworkSimulator")
         .def(py::init<const std::string, const std::vector<std::string>, const std::vector<std::vector<std::string>>>())
-        .def("step", &CPGNetworkSimulator::step)
+        .def("step", py::overload_cast<double>(&CPGNetworkSimulator::step))
+        .def("step", py::overload_cast<double,double>(&CPGNetworkSimulator::step))
         .def("controlled_step", &CPGNetworkSimulator::controlled_step)
+        .def("dense_step", &CPGNetworkSimulator::dense_step)
         .def("getAct", &CPGNetworkSimulator::getAct)
         .def("setAlpha", &CPGNetworkSimulator::setAlpha)
         .def("updateVariable", &CPGNetworkSimulator::updateVariable)
+        .def("getVariableValue",&CPGNetworkSimulator::getVariableValue)
         .def("setBodyTilt",&CPGNetworkSimulator::setBodyTilt)
         .def("setupVariableVector",&CPGNetworkSimulator::setupVariableVector)
         .def("updateVariableVector",&CPGNetworkSimulator::updateVariableVector)
         .def("updateParameter",&CPGNetworkSimulator::updateParameter)
         .def("setLscond", &CPGNetworkSimulator::setLscond)
         .def("getState", &CPGNetworkSimulator::getState)
-        .def("setState", &CPGNetworkSimulator::setState);
-    return m.ptr();
+        .def("setState", &CPGNetworkSimulator::setState)
+        .def("getEleak", &CPGNetworkSimulator::getEleak)
+        .def("setEleak", &CPGNetworkSimulator::setEleak)
+        .def("getIepsp", &CPGNetworkSimulator::getIepsp)
+        .def("getIipsp", &CPGNetworkSimulator::getIipsp)
+        .def("getNeuronNames", &CPGNetworkSimulator::getNeuronNames);
 }
 

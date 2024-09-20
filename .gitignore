@@ -40,3 +40,11 @@ __pycache__
 *.pyc
 
 *.h5
+CPGNetworkSimulator.egg-info
+CPGNetworkSimulator.egg-info/*
+.ipynb_checkpoints
+dist
+
+build
+
+*.eggs

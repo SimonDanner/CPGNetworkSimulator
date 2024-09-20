@@ -1,10 +1,7 @@
 import CPGNetworkSimulator as nsim
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import numpy.matlib as npml
 from scipy.stats import circstd, circmean
-import os
 from scoop import futures
 
 import functools
@@ -16,28 +13,50 @@ class simulator:
     def __init__(self,**kwargs):
         self.neurons = kwargs.get('neurons', ["RGF_NaP_L_hind", "RGF_NaP_R_hind", "RGF_NaP_L_front", "RGF_NaP_R_front"])
         self.filename = kwargs.get('filename', "./models/MLR_45.txt")
+        self.musclenames = kwargs.get('musclenames',["a","b"])
         self.dt = kwargs.get('dt',0.001)
         self.duration = kwargs.get('duration',10.0)
         self.phase_diffs = kwargs.get('phase_diffs',[(0,1),(2,3),(0,2),(0,3),(1,3),(1,2)])
         self.phase_diff_names = kwargs.get('phase_diff_names',['L-R hind','L-R fore','homolateral','diagonal','homolateral','diagonal'])
         self.alphainit = 0.0
         self.doPreRun = True
+        self.variables = {}
+        self.total_iterations = 0
+        with open( self.filename) as fp:
+            for line in fp:
+                ln = line.split()
+                if len(ln) > 0:
+                    if 'variable' in ln[0]:
+                        if ln[1] not in self.variables.keys():
+                            self.variables[ln[1]] = float(ln[2])
 
     def initialize_simulator(self):
         if not self.initialized:
-            fn = os.path.join(os.path.dirname(__file__),"..",self.filename)
-            self.sim = nsim.CPGNetworkSimulator(fn,["a","b"],(self.neurons,))
+            self.sim = nsim.CPGNetworkSimulator(self.filename,self.musclenames,(self.neurons,))
+            nn = self.sim.getNeuronNames()
+            self.neuron_indices = {v:k for k,v in nn.items()}
             self.sim.setAlpha(self.alphainit)
             self.setDuration(self.duration)
             self.initialized=True
+            self.eleak0 = np.array(self.sim.getEleak())
             if self.doPreRun:
                 for i in range(10):
                     self.run_sim()
                 self.IC = self.sim.getState()
+            self.v0 = self.sim.setupVariableVector([k for k in self.variables.keys()])
+        
+    def reset(self):
+        if self.initialized:
+            self.sim.updateVariableVector(self.v0)
+            self.sim.setState(self.IC)
             
     def updateVariable(self,name,value):
         if(name=="alpha"):
             self.sim.setAlpha(value)
+        if(name=="Eleak"):
+            #self.sim.setEleak(self.eleak0+value)
+            self.sim.setEleak(self.eleak0*(1.0-value))
+            print("updated Eleak by adding {:2.3f}".format(value))
         else:
             self.sim.updateVariable(name,value)
 
@@ -53,10 +72,25 @@ class simulator:
             out[ind_t,:]=act[0]
         return out
 
+    def run_step(self):
+        self.sim.step(self.dt)
+        act = self.sim.getAct()
+        return act[0]
+    
+    def run_step_controlled(self):
+        self.sim.controlled_step(self.dt)
+        act = self.sim.getAct()
+        return act[0]
+    
+    def run_step_dense(self):
+        self.sim.dense_step(self.dt)
+        act = self.sim.getAct()
+        return act[0]
+
     @staticmethod
-    def calc_phase(time_vec,out,phase_diffs):
-        os_=((np.diff((out>0.1).astype(np.int),axis=0)==1).T)
-        of_=((np.diff((out>0.1).astype(np.int),axis=0)==-1).T)
+    def calc_on_offsets(time_vec,out):
+        os_=((np.diff((out>0.1).astype(np.int64),axis=0)==1).T)
+        of_=((np.diff((out>0.1).astype(np.int64),axis=0)==-1).T)
         onsets=npml.repmat(time_vec[:-1],out.shape[1],1)[os_]
         offsets=npml.repmat(time_vec[:-1],out.shape[1],1)[of_]
         leg_os=(npml.repmat(np.arange(out.shape[1]),len(time_vec)-1,1).T)[os_]
@@ -71,7 +105,12 @@ class simulator:
                     np.concatenate((times_os,np.ones((len(times_os),1))*0.0),1),
                     np.concatenate((times_of,np.ones((len(times_of),1))*1.0),1)))
         times=times[times[:,0].argsort()]
-        
+        #import IPython;IPython.embed()
+        return times
+
+    @staticmethod
+    def calc_phase(time_vec,out,phase_diffs):
+        times = simulator.calc_on_offsets(time_vec,out)
         ref_onsets = times[np.logical_and(times[:,1]==0,times[:,3]==0)][:,0]
         phase_dur=np.append(ref_onsets[1:]-ref_onsets[:-1],np.nan)
 
@@ -91,6 +130,7 @@ class simulator:
             p = times[np.logical_and((times[:,1]==0) | (times[:,1]==i),times[:,3]==0)]
             indices = np.where(np.diff(p[:,1])==i)
             M[p[indices,2].astype(int),i] = p[[ind+1 for ind in indices],0]
+            
 
         phases=np.zeros((len(ref_onsets),len(phase_diffs)))
         for i,(x,y) in enumerate(phase_diffs):
@@ -100,9 +140,23 @@ class simulator:
             no_nan = ~np.isnan(np.concatenate(
                         (np.stack((phase_dur,fl_phase_dur,ex_phase_dur),1),phases),1
                         )).any(axis=1)
-            return (phase_dur[no_nan],fl_phase_dur[no_nan],ex_phase_dur[no_nan],phases[no_nan])
+            return (phase_dur[no_nan],fl_phase_dur[no_nan],ex_phase_dur[no_nan],phases[no_nan],ref_onsets[no_nan])
         else:
-            return (phase_dur,fl_phase_dur,ex_phase_dur,phases)  
+            return (phase_dur,fl_phase_dur,ex_phase_dur,phases,ref_onsets[:-1])  
+
+    @staticmethod
+    def calc_burst_durations(time_vec,out):
+        times = simulator.calc_on_offsets(time_vec,out)
+        burst_durs = []
+        for i in range(out.shape[1]):
+            #onsets = np.logical_and(times[:-1,1]==i,times[:-1,3]==0,times[1:,3]==1)
+            times_n = times[times[:,1]==i]
+            onsets = np.logical_and(times_n[:-1,3]==0,times_n[1:,3]==1)
+            burst_dur = times_n[1:,:][onsets,0]-times_n[:-1,:][onsets,0]
+            burst_on_times = times_n[:-1,:][onsets,0]
+            burst_durs.append(np.stack((burst_dur,burst_on_times),1))
+
+        return burst_durs
 
     @staticmethod
     def classify_gait_simple(duty_factor,phases): 
@@ -145,14 +199,16 @@ class simulator:
         its=0
         while max_std_phases > self.stdp_limit and its < self.its_limit:
             out = self.run_sim()
-            phase_dur,fl_phase_dur,ex_phase_dur, phases = self.calc_phase(self.time_vec,out,self.phase_diffs)
+            phase_dur,fl_phase_dur,ex_phase_dur, phases, _ = self.calc_phase(self.time_vec,out,self.phase_diffs)
             if len(phase_dur)>10:
                 mphases_ = circmean(phases[-5:,:],1.0,0.0,0)
                 max_std_phases = np.max(circstd(phases[-5:,:],1.0,0.0,0))
                 mfq = 1.0/np.nanmean(phase_dur[-5:])
             its+=1
+            self.total_iterations += 1
+            
         gaits = self.classify_gait_simple((ex_phase_dur/phase_dur)[-5:],phases[-5:,:])
-        return (mfq, mphases_, gaits[-1:])
+        return (mfq, mphases_, gaits[-1])
 
     def do_1d_bifurcation(self,variable_name,range_,steps,updown=True):
         self.initialize_simulator()
@@ -164,6 +220,7 @@ class simulator:
         IChist=list()
         j_start_back=0
         go_up_on_nan=True
+        self.total_iterations = 0
         #self.sim.setState(IC)
 
         self.updateVariable(variable_name,v[0])
@@ -172,9 +229,11 @@ class simulator:
             self.updateVariable(variable_name,v[j])
 
             fq, phases_, gait_ = self.do_iteration()
+            #import IPython;IPython.embed()
             if not np.isnan(fq):
                 frequency[j,0]=fq
-                gait[j,0]=gait_
+                if isinstance( gait_ , float):
+                    gait[j,0]=gait_
                 phases[j,:,0]=phases_
             j_start_back=j-1
             if np.isnan(fq) and not go_up_on_nan:
@@ -189,11 +248,12 @@ class simulator:
             for j in np.arange(j_start_back,-1,-1):
                 self.updateVariable(variable_name,v[j])
                 fq, phases_, gait_ = self.do_iteration()
-                frequency[j,1]=fq
-                gait[j,1]=gait_
-                phases[j,:,1]=phases_
-                if np.isnan(fq):
-                    break
+                if not np.isnan(fq):
+                    frequency[j,1]=fq
+                    if isinstance( gait_ , float):
+                        gait[j,1]=gait_
+                    phases[j,:,1]=phases_
+        print('total sim time',self.total_iterations * self.duration)
         return (v,frequency,phases,gait)
 
     def do_1d_bifurcation_helper(self,at_value,bi_variable_name,bi_range,bi_steps,at_variable_name,updown=True):
@@ -233,7 +293,7 @@ class simulator:
             self.updateVariable(name,value)
         
         out = self.run_sim()
-        phase_dur,fl_phase_dur,ex_phase_dur, phases = self.calc_phase(self.time_vec,out,self.phase_diffs)
+        phase_dur,fl_phase_dur,ex_phase_dur, phases, _ = self.calc_phase(self.time_vec,out,self.phase_diffs)
         gaits = self.classify_gait_simple((ex_phase_dur/phase_dur),phases)
         return (1/phase_dur,fl_phase_dur,ex_phase_dur, phases, gaits)
 

@@ -33,8 +33,10 @@ struct OdeSystemNetwork
     }
 };
 
-
 typedef runge_kutta_cash_karp54< myvec > stepper_type;
+typedef runge_kutta_cash_karp54< myvec > controlled_stepper_type;
+typedef boost::numeric::odeint::result_of::make_dense_output<
+    runge_kutta_dopri5< myvec > >::type dense_stepper_type;
 
 struct UpdateList{
     std::string name;
@@ -47,11 +49,16 @@ struct UpdateList{
 class CPGNetworkSimulator{
 private:
     stepper_type stepper;
-    controlled_runge_kutta< stepper_type> controlled_stepper = make_controlled( 1.0e-6 , 1.0e-6 , stepper_type() );;
+    controlled_runge_kutta< controlled_stepper_type> controlled_stepper = make_controlled( 1.0e-6 , 1.0e-6 , controlled_stepper_type() );;
+    dense_stepper_type dense_stepper = make_dense_output( 1.0e-6 , 1.0e-6 , runge_kutta_dopri5< myvec >() );
     int N_last_update=0;
+    int N_substeps=1;
     double t0=0.0;
+    double t_last_dense=0.0;
     OdeSystemNetwork sys;
     std::vector< std::vector<double> > act;
+    std::vector< std::vector<double> > Iipsp;
+    std::vector< std::vector<double> > Iepsp;
     std::vector< std::vector<std::string> > mnnames;
     std::vector<double*> variableVectorPointers;
     std::vector<std::string> variableVectorNames;
@@ -63,9 +70,14 @@ public:
     CPGNetworkSimulator(const std::string filename,const std::vector<std::string> musclenames,const std::vector<std::vector<std::string>> mnnames_);
     void setAlpha(double alpha){net->alpha = alpha;};
     void step(double dt);
+    void step(double dt, double error);
     void controlled_step(double dt);
+    void dense_step(double dt);
     const std::vector<std::vector<double>>& getAct(){return act;};
+    const std::vector<std::vector<double>>& getIepsp(){return Iepsp;};
+    const std::vector<std::vector<double>>& getIipsp(){return Iipsp;};
     bool updateVariable(const std::string var, double value);
+    double getVariableValue(const std::string var);
     void setLscond(std::vector<LimbSensorCondition>& ls_){
         net->setLscond(ls_);
     }
@@ -80,6 +92,13 @@ public:
     std::vector<double> getState(){return state.data();};
     void setState(std::vector<double> s){state = myvec(s);};
     void updateParameter(std::string name, double value);
+    std::vector<double> getEleak(){
+        return net->ELeak.data();
+    }
+    void setEleak(std::vector<double> el){
+        net->ELeak = myvec(el);
+    }
+    std::map<int,std::string> getNeuronNames(){return net->names;};
 };
 
 #endif /* Solver_hpp */
