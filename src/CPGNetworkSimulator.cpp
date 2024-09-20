@@ -80,7 +80,9 @@ void CPGNetworkSimulator::step(double dt_,double error){
             N_substeps/=2;
         }
     }
-    
+    if (N_substeps>32){
+        N_substeps=32;
+    }
 
     for(int i = 0;i<net->in_Act.size();++i){
         for(int j = 0;j<net->in_Act[0].size();++j){
