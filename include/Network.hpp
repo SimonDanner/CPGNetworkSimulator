@@ -209,7 +209,7 @@ public:
     
     Network();
     Network(int N_NP, int N_normal);
-    Network(std::string /*filename*/,std::vector<std::string> /*musclenames*/, std::vector<std::vector<std::string>> /*mnnames*/);
+    Network(std::string /*filename*/,std::vector<std::string> /*musclenames*/, std::vector<std::vector<std::string>> /*mnnames*/, bool debug);
     
     void initialize(int /*N_NP*/, int /*N_normal*/);
     

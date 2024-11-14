@@ -67,7 +67,7 @@ private:
     Network* net;
     void initialize();
 public:
-    CPGNetworkSimulator(const std::string filename,const std::vector<std::string> musclenames,const std::vector<std::vector<std::string>> mnnames_);
+    CPGNetworkSimulator(const std::string filename,const std::vector<std::string> musclenames,const std::vector<std::vector<std::string>> mnnames_,bool debug = true);
     void setAlpha(double alpha){net->alpha = alpha;};
     void step(double dt);
     void step(double dt, double error);

@@ -3,7 +3,7 @@ import numpy as np
 import numpy.matlib as npml
 from scipy.stats import circstd, circmean
 from scoop import futures
-
+import time
 import functools
 
 class simulator:
@@ -22,6 +22,7 @@ class simulator:
         self.doPreRun = True
         self.variables = {}
         self.total_iterations = 0
+        self.steps_per_report = 10
         with open( self.filename) as fp:
             for line in fp:
                 ln = line.split()
@@ -67,7 +68,7 @@ class simulator:
     def run_sim(self):
         out = np.zeros((len(self.time_vec),len(self.neurons)))
         for ind_t,t in enumerate(self.time_vec):
-            self.sim.step(self.dt)
+            self.sim.step(self.dt,1e-6)
             act = self.sim.getAct()
             out[ind_t,:]=act[0]
         return out
@@ -105,9 +106,121 @@ class simulator:
                     np.concatenate((times_os,np.ones((len(times_os),1))*0.0),1),
                     np.concatenate((times_of,np.ones((len(times_of),1))*1.0),1)))
         times=times[times[:,0].argsort()]
-        #import IPython;IPython.embed()
+        # times rows: time, leg, index, on(0)/off(1)
+        
         return times
+    
+    @staticmethod
+    def calc_phase_mid2(time_vec,out,phase_diffs):
+        times = simulator.calc_on_offsets(time_vec,out)
+        times_ms_ = []
+        for i in range(4):
+            times_l = times[times[:, 1] == i]
+            indices = np.where(np.diff(times_l[:, 3]) == -1)
+            ms = ((times_l[[ind + 1 for ind in indices], 0] + times_l[indices, 0]) / 2).T
+            times_ms_.append( 
+                np.hstack((ms, 
+                       np.ones_like(ms) * i, 
+                       npml.reshape(np.arange(len(ms)), ms.shape),
+                       np.ones_like(ms) * 2))
+            )
+        times_ms = np.concatenate(times_ms_)
+        times_ms = times_ms[times_ms[:, 0].argsort()]
 
+        ref_onsets = times[np.logical_and(times[:,1]==0,times[:,3]==0)][:,0]
+        phase_dur=np.append(ref_onsets[1:]-ref_onsets[:-1],np.nan)
+        fl_durs = []
+        ex_durs = []
+        for leg in range(4):
+            onset_ = times[np.logical_and(times[:,1]==leg,times[:,3]==0)]
+            pd_ = np.append(onset_[1:,0]-onset_[:-1,0],np.nan)
+            p = times[times[:,1]==leg]
+            indices = np.where(np.diff(p[:,3])==1)
+            print(indices,len(p),len(onset_))
+            fl_phase_dur = np.zeros((len(onset_)))
+            fl_phase_dur[:] = np.nan
+            fl_phase_dur[p[indices,2].astype(int)] = p[[ind+1 for ind in indices],0] - p[indices,0]
+            ex_phase_dur = pd_-fl_phase_dur
+            fl_durs.append(fl_phase_dur)
+            ex_durs.append(ex_phase_dur)
+        
+        
+        M = np.zeros((len(ref_onsets),out.shape[1]))
+        M[:] = np.nan
+        M[:,0]=ref_onsets
+        
+
+        for i in range(1,out.shape[1]):
+            p = times[np.logical_and((times[:,1]==0) | (times[:,1]==i),times[:,3]==0)]
+            indices = np.where(np.diff(p[:,1])==i)
+            M[p[indices,2].astype(int),i] = p[[ind+1 for ind in indices],0]
+            
+
+        phases=np.zeros((len(ref_onsets),len(phase_diffs)))
+        for i,(x,y) in enumerate(phase_diffs):
+            phases[:,i] = ((M[:,y]-M[:,x])/phase_dur)  % 1.0
+        
+        if phases.shape[0]!=0:
+            no_nan = ~np.isnan(np.concatenate(
+                        (np.stack((phase_dur,fl_phase_dur,ex_phase_dur),1),phases),1
+                        )).any(axis=1)
+            return (phase_dur[no_nan],fl_phase_dur[no_nan],ex_phase_dur[no_nan],phases[no_nan],ref_onsets[no_nan])
+        else:
+            return (phase_dur,fl_phase_dur,ex_phase_dur,phases,ref_onsets[:-1])  
+    
+    @staticmethod
+    def calc_phase_mid(time_vec,out,phase_diffs):
+        times = simulator.calc_on_offsets(time_vec,out)
+        
+        times_ms_ = []
+        for i in range(4):
+            times_l = times[times[:, 1] == i]
+            indices = np.where(np.diff(times_l[:, 3]) == -1)
+            ms = ((times_l[[ind + 1 for ind in indices], 0] + times_l[indices, 0]) / 2).T
+            times_ms_.append( 
+                np.hstack((ms, 
+                       np.ones_like(ms) * i, 
+                       npml.reshape(np.arange(len(ms)), ms.shape),
+                       np.ones_like(ms) * 2))
+            )
+        times = np.concatenate((times,np.concatenate(times_ms_)))
+        times = times[times[:, 0].argsort()]
+        
+        ref_onsets = times[np.logical_and(times[:,1]==0,times[:,3]==2)][:,0]
+        phase_dur=np.append(ref_onsets[1:]-ref_onsets[:-1],np.nan)
+
+        p = times[times[:,1]==0]
+        p = p[p[:, 3] != 2]
+        indices = np.where(np.diff(p[:,3])==1)[0]
+        indices = indices[:len(ref_onsets)]
+        fl_phase_dur = np.zeros((len(ref_onsets)))
+        
+        fl_phase_dur[:] = np.nan
+        fl_phase_dur[p[indices,2].astype(int)] = p[[ind+1 for ind in indices],0] - p[indices,0]
+        ex_phase_dur = phase_dur-fl_phase_dur
+
+        M = np.zeros((len(ref_onsets),out.shape[1]))
+        M[:] = np.nan
+        M[:,0]=ref_onsets
+        
+
+        for i in range(1,out.shape[1]):
+            p = times[np.logical_and((times[:,1]==0) | (times[:,1]==i),times[:,3]==2)]
+            indices = np.where(np.diff(p[:,1])==i)
+            M[p[indices,2].astype(int),i] = p[[ind+1 for ind in indices],0]
+            
+
+        phases=np.zeros((len(ref_onsets),len(phase_diffs)))
+        for i,(x,y) in enumerate(phase_diffs):
+            phases[:,i] = ((M[:,y]-M[:,x])/phase_dur)  % 1.0
+        if phases.shape[0]!=0:
+            no_nan = ~np.isnan(np.concatenate(
+                        (np.stack((phase_dur,fl_phase_dur,ex_phase_dur),1),phases),1
+                        )).any(axis=1)
+            return (phase_dur[no_nan],fl_phase_dur[no_nan],ex_phase_dur[no_nan],phases[no_nan],ref_onsets[no_nan])
+        else:
+            return (phase_dur,fl_phase_dur,ex_phase_dur,phases,ref_onsets)
+        
     @staticmethod
     def calc_phase(time_vec,out,phase_diffs):
         times = simulator.calc_on_offsets(time_vec,out)
@@ -135,7 +248,7 @@ class simulator:
         phases=np.zeros((len(ref_onsets),len(phase_diffs)))
         for i,(x,y) in enumerate(phase_diffs):
             phases[:,i] = ((M[:,y]-M[:,x])/phase_dur)  % 1.0
-
+        
         if phases.shape[0]!=0:
             no_nan = ~np.isnan(np.concatenate(
                         (np.stack((phase_dur,fl_phase_dur,ex_phase_dur),1),phases),1
@@ -199,22 +312,26 @@ class simulator:
         its=0
         while max_std_phases > self.stdp_limit and its < self.its_limit:
             out = self.run_sim()
-            phase_dur,fl_phase_dur,ex_phase_dur, phases, _ = self.calc_phase(self.time_vec,out,self.phase_diffs)
+            phase_dur,fl_phase_dur,ex_phase_dur, phases, _ = self.calc_phase_mid(self.time_vec,out,self.phase_diffs)
             if len(phase_dur)>10:
                 mphases_ = circmean(phases[-5:,:],1.0,0.0,0)
                 max_std_phases = np.max(circstd(phases[-5:,:],1.0,0.0,0))
                 mfq = 1.0/np.nanmean(phase_dur[-5:])
             its+=1
             self.total_iterations += 1
-            
+        if its >= self.its_limit:
+            mphases_= [np.nan for m in mphases_]
+            print('max its reached')
         gaits = self.classify_gait_simple((ex_phase_dur/phase_dur)[-5:],phases[-5:,:])
-        return (mfq, mphases_, gaits[-1])
+        return (mfq, mphases_,np.nanmean(fl_phase_dur[-5:]),np.nanmean(ex_phase_dur[-5:]), gaits[-1])
 
     def do_1d_bifurcation(self,variable_name,range_,steps,updown=True):
         self.initialize_simulator()
         v=range_[0]+(np.arange(0,steps,1))/(steps-1.0)*(range_[1]-range_[0])
         
         frequency = np.zeros((steps,2))*np.nan
+        fl_dur = np.zeros((steps,2))*np.nan
+        ex_dur = np.zeros((steps,2))*np.nan
         gait = np.zeros((steps,2),dtype=int)*np.nan
         phases = np.zeros((steps,len(self.phase_diffs),2))*np.nan
         IChist=list()
@@ -224,14 +341,17 @@ class simulator:
         #self.sim.setState(IC)
 
         self.updateVariable(variable_name,v[0])
+        tic = time.perf_counter()
         for j in range(0,steps):
             IChist.append(self.sim.getState())
             self.updateVariable(variable_name,v[j])
 
-            fq, phases_, gait_ = self.do_iteration()
+            fq, phases_,fl_dur_,ex_dur_, gait_ = self.do_iteration()
             #import IPython;IPython.embed()
             if not np.isnan(fq):
                 frequency[j,0]=fq
+                fl_dur[j,0]=fl_dur_
+                ex_dur[j,0]=ex_dur_
                 if isinstance( gait_ , float):
                     gait[j,0]=gait_
                 phases[j,:,0]=phases_
@@ -241,20 +361,31 @@ class simulator:
                 break
             if not np.isnan(fq):
                 go_up_on_nan=False
+            if (j+1)%self.steps_per_report == 0:
+                toc = time.perf_counter()
+                print(f"Iter {j+1} of {steps}*2; It/sec {self.steps_per_report / (toc - tic):.3f}")
+                tic = time.perf_counter()
                 
         
         if updown:
             self.sim.setState(IChist[j_start_back])
             for j in np.arange(j_start_back,-1,-1):
                 self.updateVariable(variable_name,v[j])
-                fq, phases_, gait_ = self.do_iteration()
+                fq, phases_,fl_dur_,ex_dur_, gait_ = self.do_iteration()
                 if not np.isnan(fq):
                     frequency[j,1]=fq
+                    fl_dur[j,1]=fl_dur_
+                    ex_dur[j,1]=ex_dur_
                     if isinstance( gait_ , float):
                         gait[j,1]=gait_
                     phases[j,:,1]=phases_
+                n_steps_completed = j_start_back+j_start_back-j+1
+                if (n_steps_completed+1)%self.steps_per_report == 0:
+                    toc = time.perf_counter()
+                    print(f"Iter {n_steps_completed+1} of {steps}*2; It/sec {self.steps_per_report / (toc - tic):.3f}")
+                    tic = time.perf_counter()
         print('total sim time',self.total_iterations * self.duration)
-        return (v,frequency,phases,gait)
+        return (v,frequency,phases,fl_dur,ex_dur,gait)
 
     def do_1d_bifurcation_helper(self,at_value,bi_variable_name,bi_range,bi_steps,at_variable_name,updown=True):
         self.initialize_simulator()

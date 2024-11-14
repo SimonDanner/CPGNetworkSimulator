@@ -20,9 +20,9 @@
 using namespace boost::numeric::ublas;
 
 
-CPGNetworkSimulator::CPGNetworkSimulator(const std::string filename,const std::vector<std::string> musclenames, const std::vector<std::vector<std::string>> mnnames_){
+CPGNetworkSimulator::CPGNetworkSimulator(const std::string filename,const std::vector<std::string> musclenames, const std::vector<std::vector<std::string>> mnnames_,bool debug){
     mnnames=mnnames_;
-    net=new Network(filename,musclenames,mnnames);
+    net=new Network(filename,musclenames,mnnames,debug);
     sys.net = net;
     initialize();
 }

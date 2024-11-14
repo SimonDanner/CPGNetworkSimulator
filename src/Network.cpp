@@ -17,6 +17,8 @@
 
 
 #include <boost/lexical_cast.hpp>
+#include "boost/iostreams/stream.hpp"
+#include "boost/iostreams/device/null.hpp"
 #include "Network.hpp"
 
 std::istream& safeGetline(std::istream& is, std::string& t)
@@ -416,10 +418,15 @@ void Network::assign_para(myvec &to,myvec from){
     }
 }
 
-Network::Network(std::string filename,std::vector<std::string> musclenames, std::vector<std::vector<std::string>> mnnames){
+Network::Network(std::string filename,std::vector<std::string> musclenames, std::vector<std::vector<std::string>> mnnames, bool debug){
     std::ifstream myfile (filename);
     std::string line;
-    
+    boost::iostreams::stream< boost::iostreams::null_sink > nullOstream( ( boost::iostreams::null_sink() ) );
+
+    auto old_cout = std::cout.rdbuf();
+    if(!debug){
+        std::cout.rdbuf(nullOstream.rdbuf());
+    }
     if (myfile.is_open())
     {
         int NNaP=-1;
