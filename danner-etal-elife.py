@@ -28,7 +28,7 @@ if __name__ == "__main__":
     cpg_sim = nsim.simulator(neurons=neurons, filename=filename) # instantiate simulator
     if options.sim == 0:
         '''Intact model '''
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation('alpha', [0.00, 1.05], steps_1D)
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
         plt.show()
     if options.sim == 1:
@@ -37,14 +37,14 @@ if __name__ == "__main__":
         cpg_sim.sim.updateVariable('V0VtoRGFdiagfh',  0.0)
         cpg_sim.sim.updateVariable('V0VtoRGFdiaghf',  0.0)
         cpg_sim.sim.updateVariable('inV0VtoRGF',  0.0)
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
     if options.sim == 2:
         '''Simulate ablation of diagonal V0V '''
         cpg_sim.initialize_simulator()
         cpg_sim.sim.updateVariable('V0VtoRGFdiagfh',  0.0)
         cpg_sim.sim.updateVariable('V0VtoRGFdiaghf',  0.0)
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
     if options.sim == 3:
         '''Simulate ablation of all V0 (V0D and V0V) '''
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         cpg_sim.sim.updateVariable('inV0VtoRGF',  0.0)
         cpg_sim.sim.updateVariable('V0DtoRGFdiagfh',  0.0)
         cpg_sim.sim.updateVariable('V0DtoRGF',  0.0)
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
     if options.sim == 4:
         '''Simulate ablation of descending long propriospinal neurons '''
@@ -63,14 +63,14 @@ if __name__ == "__main__":
         cpg_sim.sim.updateVariable('V0DtoRGFdiagfh',  0.0)
         cpg_sim.sim.updateVariable('inFH',  0.0)
         cpg_sim.sim.updateVariable('V2aHomfh',  0.0)
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
 
     if options.sim == 5:
         '''Intact model '''
         cpg_sim.initialize_simulator()
         cpg_sim.sim.setAlpha(0.2)
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation('dRGFH', [-0.2, 0.2], steps_1D)
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation('alpha', [0.02, 1.05], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
 
     if options.sim == 6:

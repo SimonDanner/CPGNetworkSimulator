@@ -1,16 +1,24 @@
 from setuptools import setup, Extension, find_packages
-from setuptools.command.build_ext import build_ext
+#from setuptools.command.build_ext import build_ext
+from pybind11.setup_helpers import Pybind11Extension, build_ext
 import sys
 import setuptools
 from pybind11.setup_helpers import Pybind11Extension as Extension
-
+import subprocess
 class get_pybind_include(object):
     """Helper class to determine the pybind11 include path
+
     The purpose of this class is to postpone importing pybind11
     until it is actually installed, so that the ``get_include()``
     method can be invoked. """
 
     def __init__(self, user=False):
+        try:
+            import pybind11
+        except ImportError:
+            if subprocess.call([sys.executable, '-m', 'pip', 'install', 'pybind11']):
+                raise RuntimeError('pybind11 install failed.')
+
         self.user = user
 
     def __str__(self):
@@ -58,6 +66,20 @@ module1 = Extension('CPGNetworkSimulator.CPGNetworkSimulator',
                     library_dirs = ['/usr/local/lib'], 
                     sources = ['./src/typedefs.cpp','./src/Network.cpp','./src/CPGNetworkSimulator.cpp','./src/CPGNetworkSimulatorPY.cpp',],
                     language = 'c++' )
+module1_pb11 = [
+    Pybind11Extension(  "CPGNetworkSimulator",
+                        sources = ['./src/typedefs.cpp','./src/Network.cpp','./src/CPGNetworkSimulator.cpp','./src/CPGNetworkSimulatorPY.cpp',],
+                        extra_compile_args=["-std=c++14", "-Ofast", "-march=native"],
+                        # Example: passing in the version to the compiled code
+                        define_macros = [('VERSION_INFO', str(MAJOR_VERSION)+'.'+str(MINOR_VERSION)),('MAJOR_VERSION', str(MAJOR_VERSION)),
+                                                    ('MINOR_VERSION', str(MINOR_VERSION))],
+                        include_dirs = ['/usr/local/include','/opt/homebrew/include',
+                                   './include',
+                                   get_pybind_include(),
+                                   get_pybind_include(user=True)],
+                        
+                        ),
+]
 
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
@@ -92,6 +114,7 @@ setup (name = 'CPGNetworkSimulator',
         url = 'https://github.com/SimonDanner/CPGNetworkSimulator',
         long_description = 'Simulator for neural network models using activity-dependent population models',
         ext_modules = [module1],
+        setup_requires=['pybind11>=2.2','wheel','setuptools'],
         install_requires=['pybind11>=2.2','numpy','scipy','matplotlib'],
         cmdclass={'build_ext': BuildExt},
         zip_safe=False,
