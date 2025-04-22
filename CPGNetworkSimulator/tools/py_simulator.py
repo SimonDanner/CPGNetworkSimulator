@@ -2,7 +2,7 @@ import CPGNetworkSimulator as nsim
 import numpy as np
 import numpy.matlib as npml
 from scipy.stats import circstd, circmean
-from scoop import futures
+
 import time
 import functools
 
@@ -23,6 +23,7 @@ class simulator:
         self.variables = {}
         self.total_iterations = 0
         self.steps_per_report = 10
+        self.print_progress = kwargs.get('print_progress', True)
         with open( self.filename) as fp:
             for line in fp:
                 ln = line.split()
@@ -60,6 +61,7 @@ class simulator:
             print("updated Eleak by adding {:2.3f}".format(value))
         else:
             self.sim.updateVariable(name,value)
+        self.iteration_variable = (name,value)
 
     def setDuration(self,dur):
         self.duration = dur
@@ -321,7 +323,13 @@ class simulator:
             self.total_iterations += 1
         if its >= self.its_limit:
             mphases_= [np.nan for m in mphases_]
-            print('max its reached')
+            if self.print_progress:
+                ostr = 'max iterations reached' 
+                if hasattr(self,'iteration_variable'):
+                    ostr += ' - variable: {:5} {:4.3f}'.format(self.iteration_variable[0],self.iteration_variable[1])
+                ostr += ' - max std phases: {:2.3f} > {:2.3f}'.format(max_std_phases,self.stdp_limit)
+                print(ostr)
+            
         gaits = self.classify_gait_simple((ex_phase_dur/phase_dur)[-5:],phases[-5:,:])
         return (mfq, mphases_,np.nanmean(fl_phase_dur[-5:]),np.nanmean(ex_phase_dur[-5:]), gaits[-1])
 
@@ -356,14 +364,15 @@ class simulator:
                     gait[j,0]=gait_
                 phases[j,:,0]=phases_
             j_start_back=j-1
-            if np.isnan(fq) and not go_up_on_nan:
-                j_start_back=j-2
-                break
-            if not np.isnan(fq):
-                go_up_on_nan=False
+            #if np.isnan(fq) and not go_up_on_nan:
+            #    j_start_back=j-2
+            #    break
+            #if not np.isnan(fq):
+            #    go_up_on_nan=False
             if (j+1)%self.steps_per_report == 0:
                 toc = time.perf_counter()
-                print(f"Iter {j+1} of {steps}*2; It/sec {self.steps_per_report / (toc - tic):.3f}")
+                if self.print_progress:
+                    print(f"Iter {j+1} of {steps}*2; It/sec {self.steps_per_report / (toc - tic):.3f}")
                 tic = time.perf_counter()
                 
         
@@ -382,7 +391,8 @@ class simulator:
                 n_steps_completed = j_start_back+j_start_back-j+1
                 if (n_steps_completed+1)%self.steps_per_report == 0:
                     toc = time.perf_counter()
-                    print(f"Iter {n_steps_completed+1} of {steps}*2; It/sec {self.steps_per_report / (toc - tic):.3f}")
+                    if self.print_progress:
+                        print(f"Iter {n_steps_completed+1} of {steps}*2; It/sec {self.steps_per_report / (toc - tic):.3f}")
                     tic = time.perf_counter()
         print('total sim time',self.total_iterations * self.duration)
         return (v,frequency,phases,fl_dur,ex_dur,gait)
@@ -395,6 +405,7 @@ class simulator:
         return self.do_1d_bifurcation(bi_variable_name,bi_range,bi_steps,updown)
 
     def do_2d_bifurcation(self,variable_names,ranges,steps,updown=False):
+        from scoop import futures
         v0=ranges[0][0]+(np.arange(0,steps[0],1))/(steps[0]-1.0)*(ranges[0][1]-ranges[0][0])
         frequency = np.zeros(steps+(2,))*np.nan
         gaits = np.zeros(steps+(2,))*np.nan
@@ -429,6 +440,7 @@ class simulator:
         return (1/phase_dur,fl_phase_dur,ex_phase_dur, phases, gaits)
 
     def do_noise_simulation(self,variable_name,range_,steps,sigma,set_variables=list()):
+        from scoop import futures
         v=range_[0]+(np.arange(0,steps,1))/(steps-1.0)*(range_[1]-range_[0])
         self.duration = 100.0
         self.doPreRun = False
