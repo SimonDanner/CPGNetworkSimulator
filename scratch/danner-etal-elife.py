@@ -17,7 +17,7 @@ import numpy as np
 if __name__ == "__main__":
     neurons = ["RGF_NaP_L_hind", "RGF_NaP_R_hind",      # neurons to be read every time step 
                "RGF_NaP_L_front", "RGF_NaP_R_front"]
-    filename = "./models/Danner-etal-eLife.txt" #  network model configuration file 
+    filename = "../models/Danner-etal-eLife.txt" #  network model configuration file 
 
     steps_1D = 100       #number of steps for 1D-bifurcation diagrams
 
