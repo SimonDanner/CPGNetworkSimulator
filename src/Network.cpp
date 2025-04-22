@@ -1021,7 +1021,12 @@ double Network::getVariableValue(std::string name){
 };
 
 double* Network::getVariablePointers(std::string name){
-    return variableMap[name];
+    auto it = variableMap.find(name);
+    if (it != variableMap.end()) {
+        return it->second;
+    }
+    std::cout << "variable " << name << " not found" << std::endl;
+    return nullptr;
 };
 
 void Network::setPara(std::string parameter, std::string neuron_substr,double value){

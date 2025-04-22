@@ -28,7 +28,7 @@ class simulator:
             for line in fp:
                 ln = line.split()
                 if len(ln) > 0:
-                    if 'variable' in ln[0]:
+                    if 'variable' == ln[0]:
                         if ln[1] not in self.variables.keys():
                             self.variables[ln[1]] = float(ln[2])
 

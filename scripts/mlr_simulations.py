@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     neurons = ["RGF_NaP_L_hind", "RGF_NaP_R_hind",      # neurons to be read every time step 
                "RGF_NaP_L_front", "RGF_NaP_R_front"]
-    filename = "./models/Ausborn-etal-eLife.txt" #  network model configuration file 
+    filename = "../models/Ausborn-etal-eLife.txt" #  network model configuration file 
 
     #Note: the resolution of all calculations has been reduced to speed up simulation time.
     #Change following three values to increase number of steps
@@ -41,14 +41,14 @@ if __name__ == "__main__":
 
     if options.sim == 0:
         """Bifurcation diagram unilateral stimulation of glutaminergic neurons in CNF"""
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation(
             'd0_CnF_Glu_L', [3.95, 5.3675], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
         plt.show()
 
     elif options.sim == 1:
         """Bifurcation diagram unilateral stimulation of glutaminergic neurons in PPN"""
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation(
             'd0_PPN_Glu', [4.0, 5.5], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
         plt.show()
@@ -61,14 +61,14 @@ if __name__ == "__main__":
         cpg_sim.sim.updateVariable('PPN_Glu_to_cLGPi_Glu1', 0.0)
         cpg_sim.sim.updateVariable('PPN_GAT_to_PPN_Glu',    0.0)
 
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation(
             'd0_CnF_Glu_L', [4.2, 6.8775], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
         plt.show()
 
     elif options.sim == 3:
         """Bifurcation diagram unlilateral stimulation of LPGi"""
-        v, fq, ph, gait = cpg_sim.do_1d_bifurcation(
+        v, fq, ph,fl_dur,ex_dur, gait = cpg_sim.do_1d_bifurcation(
             'd0_LPGi_Glu', [2.45, 2.45+1.1], steps_1D)
         plot_1d_bifurcation_diagram(v, fq, ph, gait)
         plt.show()
